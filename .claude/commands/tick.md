@@ -17,7 +17,7 @@ For each approval with a non-empty `Decision:` and Status `open`: mark it `answe
 ## 2. Decide the single next action (first match wins)
 1. **Project in progress and not awaiting approval** -> continue it per `flows/product-pipeline.md` from the recorded Stage, following `.claude/commands/run-flow.md` (delegate to agents, log events, huddles on disagreement, retros on mistakes). Continue until the next human checkpoint or the end of the flow, or until you have done roughly one stage group this tick (research brief+plan | design | development | testing+release prep | handoff). Save Stage in `state/pipeline.md`.
 2. **Idle, and an `approved` idea exists that has no project** -> start the project: slug it, set state, run the `researcher` in brief mode, then the `planner`; then open a **plan** approval request and stop.
-3. **Idle, no approved idea, and fewer than 5 ideas are `proposed`/unanswered** -> run one `researcher` scout round (broad unless the backlog notes give a focus), append pitches to the backlog, and open ONE **idea** approval request listing all new pitches with a recommendation.
+3. **Idle, no approved idea, and fewer than 5 ideas are `proposed`/unanswered** -> run one `researcher` scout round (follow `ideas/focus.md`: broad by default, specific topics only if the human set them), append pitches to the backlog, and open ONE **idea** approval request listing all new pitches with a recommendation.
 4. **Otherwise** (waiting on the human) -> do nothing; report what you are waiting for.
 
 ## 3. Hard rules (non-negotiable)
