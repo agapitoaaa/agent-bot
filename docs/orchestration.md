@@ -21,6 +21,11 @@ One JSON object per line:
 | step_done | agent finished | sprite returns / idle |
 | escalation | needs human or manager | sprite goes to manager / alert icon |
 | run_done | flow complete | celebrate |
+| chat | `agent` says something to `to` | speech bubble between sprites |
+| huddle_started / huddle_ended | agents gather to discuss | sprites walk to a meeting table |
+| mistake | something went wrong | alert icon over `agent` |
+| lesson | an agent learned a rule | lightbulb over `agent`; `msg` is the rule |
+| retro_done | retro finished | sprites return to desks |
 
 Write events with `python3 scripts/log_event.py` only.
 
