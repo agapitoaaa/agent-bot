@@ -8,7 +8,7 @@ A later phase adds an "office view" that animates sprites for each agent working
 - `.claude/agents/<name>.md`: subagents (frontmatter `name`, `description`, `tools`, `model`)
 - `.claude/commands/<name>.md`: slash commands
 - `flows/<name>.md`: multi-step workflows that chain agents and skills (see `flows/README.md`)
-- `docs/`: design notes and decisions
+- `docs/`: design notes and decisions; `docs/org-chart.md` lists every agent/role
 - `office-view/`: the future sprite-based office visualization (see `office-view/README.md`)
 
 ## Conventions
