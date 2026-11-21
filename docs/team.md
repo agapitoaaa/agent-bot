@@ -4,7 +4,7 @@ The orchestrator is the main Claude session (acting as Chief of Staff via `/run-
 
 | Stage | Agent | Role |
 |---|---|---|
-| research | researcher | Researcher (stage 1). Use first: market, competitor, user-need and feasibility research for a product idea. |
+| research | researcher | Researcher (stage 1). Scouts trends and pitches ideas to the human for sign-off, then briefs the planner on the approved one. |
 | planning | planner | Planner (stage 2). Use after research to produce the PRD, scope, milestones, and task breakdown. |
 | design | designer | Designer (stage 3). Use after planning for user flows, screen specs, and visual style (UX + UI). |
 | development | backend-engineer | Backend Engineer (stage 4). Use to build APIs, data and logic per the plan. |

@@ -7,6 +7,7 @@ A later phase adds an "office view" that animates sprites for each agent working
 - `.claude/skills/<name>/SKILL.md`: reusable skills (frontmatter `name`, `description`, then instructions)
 - `.claude/agents/<name>.md`: subagents (frontmatter `name`, `description`, `tools`, `model`)
 - `.claude/commands/<name>.md`: slash commands
+- `ideas/backlog.md`: researcher idea pitches and their sign-off status
 - `flows/<name>.md`: multi-step workflows that chain agents and skills (see `flows/README.md`)
 - `docs/`: design notes and decisions; `docs/team.md` lists the agents
 - `office-view/`: the future sprite-based office visualization (see `office-view/README.md`)
