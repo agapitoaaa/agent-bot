@@ -10,7 +10,7 @@
 5. `engineering-manager` -> PRD + specs -> task breakdown assigned to `frontend-engineer` / `backend-engineer`
 6. `code-reviewer` + `security-engineer` -> diff -> review findings
 7. `qa-engineer` -> build + acceptance criteria -> test report
-8. `legal-counsel` / `compliance-officer` -> feature -> risk notes (parallel with 6-7)
+8. (parallel with 6-7) `legal-counsel` / `compliance-officer` -> feature -> risk notes
 9. `devops-engineer` -> approved build -> deployment
 10. `technical-writer` + `content-writer` -> shipped feature -> docs and announcement draft
 11. `customer-support` -> docs -> FAQ updates

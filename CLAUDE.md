@@ -11,6 +11,8 @@ A later phase adds an "office view" that animates sprites for each agent working
 - `docs/`: design notes and decisions; `docs/org-chart.md` lists every agent/role
 - `office-view/`: the future sprite-based office visualization (see `office-view/README.md`)
 
+- `scripts/`: helpers (`log_event.py` writes run events); `runs/`: flow run logs; `docs/orchestration.md`: how `/run-flow` works
+
 ## Conventions
 - One skill/agent per file or folder, with a specific `description` so it triggers correctly.
 - Each agent has a single role. Flows define the handoffs between agents.
