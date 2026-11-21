@@ -1,4 +1,4 @@
-# Office view (planned)
+# Office view
 
 A visual of sprites moving around a virtual office, one per agent.
 
@@ -10,3 +10,10 @@ Rough plan:
 ## Status
 - `style-preview.html`: side-by-side demo of two candidate styles (pixel vs isometric), driven by a scripted run. Published as an artifact.
 - TODO when going live: replace the scripted run with a reader for `runs/*.jsonl` (events in `docs/orchestration.md`). Artifacts can't read the repo, so live mode needs the logs published alongside the page or a small local server. **Remind the user about this when we move to live.**
+
+## Decision
+Style chosen: **isometric flat color, with slimes as the employees** (anime theme). `office.html` is the working view; `style-preview.html` is the earlier pixel-vs-isometric comparison, kept for reference.
+
+Slime roster (matches `.claude/agents`): Nova (explorer cap), Marlowe (round glasses), Sage (beret), Pixel (headphones), Atlas (hard hat), Vex (goggles), Anchor (captain hat), Quill (feather quill). You are the crowned slime at the Approvals desk.
+
+When adding an agent: add a cast entry (desk, body color, accessory) in `office.html` and an `office:` line in its agent file.
