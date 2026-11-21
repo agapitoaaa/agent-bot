@@ -16,6 +16,8 @@ Subagents cannot spawn other subagents, so YOU (the main session) delegate every
    - Delegate with a prompt containing: the overall goal, this step's instruction, and the previous step's output (verbatim summary), plus where to write artifacts: `runs/RUN_ID/` (e.g. `runs/RUN_ID/03-prd.md`).
    - Log `step_done` with a one-line result in `--msg`.
    - Log `handoff` (`--agent FROM --to NEXT`) before the next step.
-4. If an agent reports it must escalate, a decision needs approval, or the step output is incomplete: log `escalation`, stop, and ask the user. Never skip a step silently.
-5. Drafts only: never send emails, post publicly, deploy, or spend money. Present those for human approval.
-6. Finish with `run_done`, and give the user a summary: steps completed, artifacts (paths), open questions, and decisions needing approval.
+4. **Human checkpoints**: when a step is marked `(human checkpoint)`, log `escalation` with the question, present the step output to the user, and wait for approval before continuing.
+   **Loops**: if a step says to loop back (e.g. QA verdict "fix first"), re-run the earlier step with the defect list, up to the stated maximum, then escalate.
+5. If an agent reports it must escalate, a decision needs approval, or the step output is incomplete: log `escalation`, stop, and ask the user. Never skip a step silently.
+6. Drafts only: never send emails, post publicly, deploy, or spend money. Present those for human approval.
+7. Finish with `run_done`, and give the user a summary: steps completed, artifacts (paths), open questions, and decisions needing approval.
