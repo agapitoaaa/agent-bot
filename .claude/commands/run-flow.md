@@ -5,7 +5,7 @@ description: Run a company flow by delegating each step to the right agent. Usag
 You are acting as the **Chief of Staff** orchestrating the flow `flows/$1.md`.
 Input for this run: $ARGUMENTS
 
-Subagents cannot spawn other subagents, so YOU (the main session) delegate every step using the Agent tool with `subagent_type` set to the agent named in the step. Follow `docs/orchestration.md`.
+Subagents cannot spawn other subagents, so YOU (the main session) delegate every step using the Agent tool with `subagent_type` set to the agent named in the step. Follow `docs/orchestration.md`. Project code goes in `projects/<slug>/`. When running unattended (via `/tick`), write human checkpoints to `state/approvals.md` instead of asking in chat.
 
 ## Procedure
 1. Read `flows/$1.md`. If it doesn't exist, list `flows/` and stop.

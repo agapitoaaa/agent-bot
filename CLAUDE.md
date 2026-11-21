@@ -13,6 +13,7 @@ A later phase adds an "office view" that animates sprites for each agent working
 - `office-view/`: the future sprite-based office visualization (see `office-view/README.md`)
 
 - `memory/`: per-agent lessons + `team.md` shared rules; `docs/collaboration.md`: personas, huddles, retros
+- `state/`: pipeline state + `approvals.md` inbox (autonomy, see `docs/autonomy.md`); `projects/`: built products; `/tick` runs one autonomous step
 - `scripts/`: helpers (`log_event.py` writes run events); `runs/`: flow run logs; `docs/orchestration.md`: how `/run-flow` works
 
 ## Conventions
