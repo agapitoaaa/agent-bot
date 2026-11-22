@@ -1,0 +1,2 @@
+{"ts": "2026-11-22T09:07:47+00:00", "run_id": "scout-20261122-090747", "type": "run_started", "flow": "product-pipeline", "msg": "scout: broad (manual tick)"}
+{"ts": "2026-11-22T09:07:47+00:00", "run_id": "scout-20261122-090747", "type": "step_started", "flow": "product-pipeline", "step": 1, "agent": "researcher", "msg": "scouting trends (broad)"}
