@@ -62,6 +62,36 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
 .tools label.chk{display:inline-flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}
 #status{margin:0;color:var(--muted);font-size:13.5px;min-height:1.5em}
 #status.err{color:var(--bad)}
+.cnt{display:inline-block;min-width:1.6em;text-align:center;padding:0 .45em;border-radius:99px;background:var(--chip);font-size:12px;font-weight:600;vertical-align:middle}
+.cnt.has{background:var(--accent);color:var(--accent-ink)}
+#approvals h2{display:flex;gap:8px;align-items:center}
+.apnote{margin:0 0 10px;color:var(--muted);font-size:13.5px}
+.req{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:10px;margin-bottom:10px;min-width:0}
+.req .hd{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.req .hd b{font-family:var(--f-head);font-size:15px;min-width:0;overflow-wrap:anywhere}
+.req .meta{color:var(--muted);font-size:12.5px;margin-left:auto}
+.kind{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:1px 8px;border-radius:99px;background:var(--chip);color:var(--muted)}
+.req .sum{white-space:pre-wrap;font-size:14px;margin:0;overflow-wrap:anywhere}
+.opts{display:grid;gap:8px;margin:0;padding:0;border:0;min-width:0}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;min-width:0}
+.opt:has(input:checked){border-color:var(--accent);background:var(--chip)}
+.opt input{margin-top:4px;flex:none}
+.opt span{min-width:0;overflow-wrap:anywhere;font-size:14px}
+.opt small{display:block;color:var(--muted);font-size:13px}
+.req textarea{all:unset;box-sizing:border-box;width:100%;min-height:3.2em;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:14px;color:var(--ink);white-space:pre-wrap}
+.req textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{all:unset;cursor:pointer;padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:600}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.no{color:var(--bad)}
+.btn[aria-disabled="true"]{opacity:.5;cursor:default}
+.req .err{color:var(--bad);font-size:13px;margin:0}
+.req.done{padding:10px 14px}
+.dec{font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--chip)}
+.dec.approve{color:var(--good)} .dec.reject{color:var(--bad)} .dec.park,.dec.changes{color:var(--warn)}
+#apdone summary{cursor:pointer;font-weight:600;font-size:14px;margin:6px 0 10px}
+.empty{margin:0;padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:14px}
 .legend{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
 .legend b{color:var(--ink);font-weight:600}
 </style>
@@ -81,6 +111,7 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
       </span></div>
     <button type="button" class="act" id="play">Pause</button>
     <button type="button" class="act" id="restart">Restart</button>
+    <button type="button" class="act" id="goap">Approvals <span class="cnt" id="badge">0</span></button>
   </div>
 
   <div class="bar">
@@ -101,6 +132,13 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
 
   <div class="stage" id="stage"><canvas id="cv" width="1920" height="1080"></canvas><div class="ov" id="ov"></div></div>
 
+  <section class="card" id="approvals" aria-labelledby="ap-h">
+    <h2 id="ap-h">Approvals <span class="cnt" id="apcount">0</span></h2>
+    <p class="apnote" id="apnote">Loading proposals&hellip;</p>
+    <div id="aplist"></div>
+    <details id="apdone" hidden><summary>Answered (<span id="apdn">0</span>)</summary><div id="apdonelist"></div></details>
+  </section>
+
   <div class="grid">
     <div class="card"><h2>Event feed <span style="font-weight:400;color:var(--muted);font-size:13px">(from the demo, or from your run log)</span></h2><ol id="feed" style="list-style:none"></ol>
       <ul class="legend">
@@ -117,7 +155,7 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
 <script>
 (function(){
 "use strict";
-var W=18,H=10,AISLE=5.4,SPEED=4.2;
+var W=18,H=10,AISLE=5.4,SPEED=4.2,OPEN=0;
 var CAST=[
  {id:'researcher',name:'Nova',role:'Researcher',acc:'explorer cap',blurb:'Curious scout. Falls for hype.',x:2.5,y:3,body:'#3fc1b0',hat:'#1f8f80'},
  {id:'planner',name:'Marlowe',role:'Planner',acc:'round glasses',blurb:'Calm planner. Cuts scope hard.',x:5.5,y:3,body:'#6f8cf0',hat:'#2a3a8f'},
@@ -402,9 +440,9 @@ function drawIso(ctx,s){
   items.push({k:1.4,f:function(){plant(0.7,0.8);}});
   items.sort(function(p,q){return p.k-q.k;}).forEach(function(it){it.f();});
   CAST.concat([YOU]).forEach(function(c){
-    var a=s.a[c.id];if(!a.icon)return;
+    var a=s.a[c.id];var ic=a.icon||((c.id==='you'&&OPEN>0)?'q':null);if(!ic)return;
     var hop=a.mode==='walk'?Math.abs(Math.sin(s.t*9))*10:0;
-    var p=P(a.px,a.py,seatZ(a)+74+hop+Math.sin(s.t*5+c.x)*2);icon(a.icon,p[0],p[1]);
+    var p=P(a.px,a.py,seatZ(a)+74+hop+Math.sin(s.t*5+c.x)*2);icon(ic,p[0],p[1]);
     if(a.icon==='star'){var q=P(a.px,a.py,seatZ(a)+34);var ph=s.t*3+c.x;sparkle(q[0]-26,q[1]-8+Math.sin(ph)*3,7,0.5+0.5*Math.sin(ph));sparkle(q[0]+26,q[1]-18+Math.cos(ph)*3,6,0.5+0.5*Math.cos(ph));}
   });
 
@@ -507,11 +545,13 @@ function makeOverlay(el){
     var bub=document.createElement('div');bub.className='bubble';bub.hidden=true;
     el.appendChild(bub);el.appendChild(tag);rows[c.id]={tag:tag,bub:bub,txt:''};
   });
+  var apEl=null;
   STATIC_LABELS.forEach(function(l){
-    var d=document.createElement('div');d.className='sl';d.textContent=l.t;
+    var d=document.createElement('div');d.className='sl';d.textContent=l.t;if(l.t==='Approvals')apEl=d;
     var q=P(l.x,l.y,l.z);d.style.left=q[0]/960*100+'%';d.style.top=q[1]/540*100+'%';el.appendChild(d);
   });
   return function(s){
+    if(apEl){var tx='Approvals'+(OPEN?' ('+OPEN+')':'');if(apEl.textContent!==tx)apEl.textContent=tx;}
     CAST.concat([YOU]).forEach(function(c){
       var a=s.a[c.id],r=rows[c.id];
       var below=a.mode==='sit'?P(a.px,a.py+1.25,6):P(a.px,a.py+0.2,-6);
@@ -548,6 +588,99 @@ CAST.concat([YOU]).forEach(function(c){
   d.querySelector('b').textContent=c.name;d.querySelector('small').textContent=c.role+' \u00b7 '+c.acc;d.querySelector('span').textContent=c.blurb;
   roster.appendChild(d);
 });
+/* ---------- approvals panel (shared db, owner/editors only) ---------- */
+var apEls={},apOpenIds={};
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
+function fmtDate(iso){var d=new Date(iso);return isNaN(d)?'':d.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});}
+function setApNote(msg){document.getElementById('apnote').textContent=msg;}
+function updateCounts(n,done){
+  OPEN=n;
+  var a=document.getElementById('apcount'),b=document.getElementById('badge');
+  a.textContent=n;b.textContent=n;a.className='cnt'+(n?' has':'');b.className='cnt'+(n?' has':'');
+  document.getElementById('apdn').textContent=done;
+  document.getElementById('apdone').hidden=!done;
+}
+function buildRequest(id,d,docRef,canWrite){
+  var open=d.status!=='answered',card=el('div','req'+(open?'':' done'));
+  var hd=el('div','hd');hd.appendChild(el('span','kind',d.kind||'request'));hd.appendChild(el('b','',d.title||id));
+  if(!open){var dc=el('span','dec '+(d.decision||''),(d.decision||'answered')+(d.chosen?' #'+d.chosen:''));hd.appendChild(dc);}
+  hd.appendChild(el('span','meta',open?fmtDate(d.asked):fmtDate(d.answeredAt)));
+  card.appendChild(hd);
+  if(d.summary)card.appendChild(el('p','sum',d.summary));
+  if(!open){
+    if(d.note)card.appendChild(el('p','sum','Your note: '+d.note));
+    if(canWrite){var rb=el('button','btn','Reopen');rb.type='button';rb.addEventListener('click',function(){docRef.update({status:'open',decision:null,chosen:null,answeredAt:null,applied:null}).catch(function(){});});card.appendChild(rb);}
+    return card;
+  }
+  var opts=Array.isArray(d.options)?d.options:[],chosen=d.recommended||null,fs=null;
+  if(opts.length){
+    fs=el('fieldset','opts');
+    opts.forEach(function(o){
+      var lab=el('label','opt'),inp=document.createElement('input');inp.type='radio';inp.name='opt-'+id;inp.value=o.id;inp.id='opt-'+id+'-'+o.id;
+      if(o.id===chosen)inp.checked=true;inp.addEventListener('change',function(){chosen=o.id;});
+      var sp=el('span','',(o.title||o.id)+(o.id===d.recommended?'  (recommended)':''));if(o.blurb)sp.appendChild(el('small','',o.blurb));
+      lab.appendChild(inp);lab.appendChild(sp);fs.appendChild(lab);
+    });
+    card.appendChild(fs);
+  }
+  if(!canWrite){card.appendChild(el('p','apnote','You need edit access to answer this.'));return card;}
+  var note=document.createElement('textarea');note.id='note-'+id;note.placeholder='Optional note. Required if you ask for changes.';note.rows=2;
+  card.appendChild(note);
+  var err=el('p','err');err.hidden=true;
+  var btns=el('div','btns'),busy=false;
+  function decide(decision){
+    if(busy)return;
+    var text=note.value.trim();
+    if(decision==='changes'&&!text){err.textContent='Add a note saying what to change.';err.hidden=false;return;}
+    if(decision==='approve'&&opts.length&&!chosen){err.textContent='Choose one option to approve.';err.hidden=false;return;}
+    busy=true;err.hidden=true;
+    [].forEach.call(btns.children,function(b){b.setAttribute('aria-disabled','true');});
+    docRef.update({status:'answered',decision:decision,chosen:(decision==='approve'&&chosen)?chosen:null,note:text||null,answeredAt:new Date().toISOString(),applied:null})
+      .catch(function(e){busy=false;[].forEach.call(btns.children,function(b){b.removeAttribute('aria-disabled');});err.textContent='Could not save ('+((e&&e.code)||'error')+'). Try again.';err.hidden=false;});
+  }
+  [['Approve','go','approve'],['Park','','park'],['Reject','no','reject'],['Request changes','','changes']].forEach(function(b){
+    var bt=el('button','btn '+b[1],b[0]);bt.type='button';bt.addEventListener('click',function(){decide(b[2]);});btns.appendChild(bt);
+  });
+  card.appendChild(btns);card.appendChild(err);
+  return card;
+}
+function renderApprovals(snap,db,canWrite){
+  var list=document.getElementById('aplist'),dlist=document.getElementById('apdonelist'),seen={},nOpen=0,nDone=0,docs=[];
+  snap.docs.forEach(function(s){if(s.exists)docs.push(s);});
+  docs.forEach(function(s){
+    var id=s.id,d=s.data(),open=d.status!=='answered';
+    seen[id]=true;if(open)nOpen++;else nDone++;
+    var cur=apEls[id];
+    if(cur&&cur.data===d)return;
+    var card=buildRequest(id,d,db.collection('approvals').doc(id),canWrite);
+    var host=open?list:dlist;
+    if(cur&&cur.el.parentNode)cur.el.parentNode.removeChild(cur.el);
+    host.appendChild(card);apEls[id]={el:card,data:d};
+  });
+  Object.keys(apEls).forEach(function(id){if(!seen[id]){var c=apEls[id];if(c.el.parentNode)c.el.parentNode.removeChild(c.el);delete apEls[id];}});
+  var empty=document.getElementById('apempty');
+  if(!nOpen&&!empty){empty=el('p','empty','Nothing is waiting for you. New ideas and sign-off requests appear here after each scouting round.');empty.id='apempty';list.appendChild(empty);}
+  else if(nOpen&&empty)empty.parentNode.removeChild(empty);
+  updateCounts(nOpen,nDone);
+  setApNote(canWrite?'Your decisions are saved here. The next scheduled run, or a message to Claude, applies them to the repo.':'Read-only: you need edit access on this page to answer.');
+}
+document.getElementById('goap').addEventListener('click',function(){document.getElementById('approvals').scrollIntoView({behavior:'smooth',block:'start'});});
+(async function(){
+  var api=window.claude;
+  if(!api||!api.use){setApNote('Approvals appear here when this page is opened from claude.ai.');return;}
+  var db=null,user=null;
+  try{db=await api.use('db');user=await api.use('user');}catch(e){}
+  if(!db){setApNote('Approvals need a signed-in viewer with access to this page.');return;}
+  var canWrite=true;
+  try{if(user){canWrite=!!(await user.canEdit());}}catch(e){}
+  var gotData=false,timer=setTimeout(function(){if(!gotData)setApNote("Can't reach saved approvals yet. They will appear when the connection is back.");},10000);
+  try{
+    db.collection('approvals').orderBy('asked','asc').onSnapshot(function(snap){
+      gotData=true;clearTimeout(timer);renderApprovals(snap,db,canWrite);
+    },function(e){clearTimeout(timer);setApNote('Could not load approvals ('+((e&&e.code)||'error')+').');});
+  }catch(e){clearTimeout(timer);setApNote('Could not load approvals.');}
+})();
+
 var speed=1,playing=!window.matchMedia('(prefers-reduced-motion: reduce)').matches,last=0;
 function frame(ts){
   var dt=last?Math.min(0.05,(ts-last)/1000):0;last=ts;
