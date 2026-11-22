@@ -37,3 +37,9 @@ Request format (appended by `/tick`):
 - Summary: Readiness roadmap (docs/trader-live-readiness.md) and platform research (docs/trader-platforms.md). Choose: assisted live (recommended), API live later, or paper only. No live trading happens in any option without separate approvals.
 - Decision:
 
+### A5: plan | Ledger: what he studies and tests first
+- Status: open
+- Asked: 2026-11-22T11:13:57Z
+- Summary: Curriculum, strategy catalog and source catalog (trading/knowledge/). Recommended: benchmark plus one trend experiment (max 3 parameter sets), with QA challenge. Approving only lets Ledger write pre-registered hypotheses; nothing is coded or run.
+- Decision:
+
