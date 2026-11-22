@@ -25,3 +25,9 @@ Request format (appended by `/tick`):
 - Summary: Generic P2 is served by free tools (ccusage, agentsight) and vendor features. Options: narrow (per-flow-stage cost + waste detection, recommended), internal tool only, or go back to the idea list. Full brief: runs/product-pipeline-20261122-091241/research.md
 - Decision:
 
+### A3: plan | Plan: Ledger, the paper-trading agent
+- Status: open
+- Asked: 2026-11-22T09:19:22Z
+- Summary: Plan for a paper-trading-only trader agent (docs/trader-bot-plan.md). Choose phase-1 market (us-equities recommended) and answer the questions in the note. Approval starts the foundation phase only; real money is out of scope without a separate approval.
+- Decision:
+
