@@ -16,6 +16,8 @@ A later phase adds an "office view" that animates sprites for each agent working
 - `state/`: pipeline state + `approvals.md` inbox (autonomy, see `docs/autonomy.md`); `projects/`: built products; `/tick` runs one autonomous step
 - `scripts/`: helpers (`log_event.py` writes run events); `runs/`: flow run logs; `docs/orchestration.md`: how `/run-flow` works
 
+- `trading/`: the Trading department (Ledger, paper only); `docs/departments/trading.md`
+
 ## Conventions
 - One skill/agent per file or folder, with a specific `description` so it triggers correctly.
 - Each agent owns one pipeline stage. Flows define the handoffs; the main session orchestrates.

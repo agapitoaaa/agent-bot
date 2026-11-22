@@ -15,3 +15,8 @@ The orchestrator is the main Claude session (acting as Chief of Staff via `/run-
 | trading | trader | Ledger (paper-only trading research agent). Learns markets, scours the web for evidence, pre-registers hypotheses, proposes paper orders through the risk guard. Never trades real money. |
 
 The larger 38-role company (executives, marketing, sales, finance, legal...) was removed to keep this lean; it lives in git history (commit aa7c0f8) if we want to bring back departments.
+
+## Departments
+- **Product delivery** (pipeline): researcher, planner, designer, frontend-engineer, backend-engineer, qa-engineer, release-engineer, handoff-writer.
+- **Trading** (`docs/departments/trading.md`): trader (Ledger), the only employee for now. Paper only.
+Shared services: the `researcher` and `qa-engineer` also support Trading.

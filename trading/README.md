@@ -6,3 +6,7 @@ PAPER ONLY. See `docs/trader-bot-plan.md`, `docs/trader-live-readiness.md`, `doc
 - `hypotheses/`: pre-registered ideas and trial logs
 - `journal/`: decisions logged before outcomes
 - `risk/`: guard and limits (Ledger has read-only access; owner approval to change)
+
+- `analysis/trend.py`: descriptive trend analysis (tests in `analysis/tests`)
+- `memory/`: gated lessons, policy, generated `rules.md` (tool: `scripts/trade_memory.py`, tests in `memory/tests`)
+- Department charter: `docs/departments/trading.md`

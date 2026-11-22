@@ -1,0 +1,13 @@
+{
+  "_note": "Owner-controlled. Ledger must not edit this file; changes need owner approval via the control room.",
+  "min_sample_for_scorecard_claims": 30,
+  "lesson_levels": {
+    "observation": "A noticed pattern. Never changes behaviour. Needs nothing.",
+    "candidate":   "May lower size or add caution, never raise risk. Needs >= 3 supporting decisions.",
+    "rule":        "May be applied by default. Needs >= 10 supporting decisions, contradicting <= 20% of support, and QA review."
+  },
+  "candidate_min_support": 3,
+  "rule_min_support": 10,
+  "rule_max_contra_ratio": 0.2,
+  "calibration_bins": [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+}
