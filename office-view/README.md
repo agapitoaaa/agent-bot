@@ -23,3 +23,6 @@ When adding an agent: add a cast entry (desk, body color, accessory) in `office.
 
 ## Control room (office.html)
 The page is the human's single place to run the pipeline: Pipeline status, Approvals (with full documents), Actions (run next step, scout now, message the team, pause), Research focus. All state lives in the artifact database (`approvals`, `commands`, `settings/focus`, `settings/autonomy`, `status/pipeline`); Claude (or the tick) reads commands/settings and writes status. See `docs/autonomy.md`.
+
+## Trading department
+Ledger (`trader`) has a corner of the office: two-monitor desk, a market board on the wall, and a green rug. Events `trade_opened`, `trade_closed`, `risk_block` and `halt` animate him (bubbles, alerts). Paper only; no real trades exist.
