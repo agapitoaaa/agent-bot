@@ -1,2 +1,4 @@
 {"ts": "2026-11-22T09:31:35+00:00", "run_id": "trader-research-20261122-093135", "type": "run_started", "flow": "trader-research", "msg": "A3 approved: platform + real-money readiness research"}
 {"ts": "2026-11-22T09:31:35+00:00", "run_id": "trader-research-20261122-093135", "type": "step_started", "agent": "researcher", "msg": "researching demo + live trading platforms"}
+{"ts": "2026-11-22T09:35:42+00:00", "run_id": "trader-research-20261122-093135", "type": "step_done", "agent": "researcher", "msg": "platforms.md (Philippines)"}
+{"ts": "2026-11-22T09:35:42+00:00", "run_id": "trader-research-20261122-093135", "type": "escalation", "agent": "researcher", "msg": "Review real-money roadmap + platforms (A4)"}

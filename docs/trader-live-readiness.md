@@ -65,3 +65,22 @@ Country; loss budget; whether to pay for an always-on static-IP host; paper star
 
 ## 11. Unverified
 Alpha Arena and contest figures are from news coverage, not primary data; FIA guidance is institutional, not retail; the vendor claims on paper-versus-live differences are unverified; tax and regulation details are country-specific and not checked.
+
+## 12. Philippines reality check (owner is in the Philippines)
+Full research: `docs/trader-platforms.md` (Nova, search snippets only, many third-party sources). Headlines:
+- **Crypto:** the Philippine SEC and BSP are cracking down on offshore exchanges. Binance was blocked by the NTC in March 2024. The SEC named OKX, Bybit, KuCoin, Kraken, MEXC, Bitget and others as unregistered in an Aug 2025 advisory (ISP blocks followed for several); more platforms were flagged through April 2026; Coinbase and Gemini were reported blocked in late 2025. New crypto-service-provider rules took effect 5 July 2025. Do not use offshore exchanges for real money. BSP-licensed local venues are Coins.ph, PDAX and GoTyme (bank channel). Coins.ph has official trading API docs (HMAC-signed trade endpoints, key and IP permissions); whether keys can be trade-only with withdrawals off is unconfirmed; a Coins.ph licence-revocation rumour in Oct 2026 was denied by the company (verify newer news). PDAX API: nothing found.
+- **US stocks/ETFs:** Interactive Brokers' official "Available Countries and Territories" pages list the Philippines (confirm which IBKR entity and funding route applies). Saxo (via Singapore) is a probable alternative. Alpaca says to ask support about a specific country; paper signup should simply be tried. Webull does not serve Philippine clients; Tradier looks excluded.
+- **Local PSE brokers (COL, BPI Trade, First Metro):** no documented retail API found, and no paper API.
+- **CFD/forex:** the SEC has acted against unauthorised platforms (Exness, HFM, XM). Out of scope.
+- **Costs and tax (not advice):** PSE stock transaction tax reported cut from 0.6% to 0.1% (RA 12214, RR 20-2025); tax treatment of US-listed stock gains and of crypto is unsettled in the sources; US dividend withholding not checked; funding routes (Wise, GCash, Maya) unconfirmed. Get a Philippine tax professional.
+
+### Recommended path for the Philippines
+1. **Now: paper trading, no live account needed.** Our own simulator and backtester on free data (guaranteed to work anywhere); try Alpaca's free paper signup and Saxo's simulator for realistic order APIs. Crypto practice via simulator on public data; exchange testnets may not be reachable.
+2. **Assisted live (recommended first real-money step):** Ledger produces signals and written reasoning, **you place the orders yourself** through a licensed venue (IBKR, a local broker app, or a BSP-licensed crypto app). No API keys on a live account, nothing automated, and it still exercises the whole learning loop with a human safety net.
+3. **API live only later**, after: eligibility confirmed with the platform, a tax professional consulted, trade-only keys verified, an always-on static-IP host, the G1-G3 gates, and a stage-1 shadow period. Stocks via IBKR or Saxo first; crypto only via a BSP-licensed venue whose API supports trade-only keys.
+
+### Quick checks you can do on your phone (official pages)
+- Alpaca: try the free paper signup with your Philippine address, and ask support about live eligibility.
+- IBKR: on the account-opening page, pick Philippines and see which entity, funding and withdrawal options it shows.
+- Coins.ph: read the API docs and key-setup article; see whether a key can be limited to trading.
+- Ask a Philippine tax professional how US-listed stock gains and crypto gains are taxed for you.
