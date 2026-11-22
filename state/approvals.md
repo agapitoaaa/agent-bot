@@ -14,7 +14,7 @@ Request format (appended by `/tick`):
 ---
 
 ### A1: idea | Scout round 1: pick an idea (or ask for another round)
-- Status: open
+- Status: answered
 - Asked: 2026-11-22T09:09:09Z
 - Summary: 5 pitches in ideas/backlog.md (P1-P5). Recommended: P1 Agent-file Linter. Evidence is mostly vendor blogs and trade press; demand is unverified for every idea. Run: scout-20261122-090747.
-- Decision:
+- Decision: approve P2 (answered 2026-11-22T09:10:38Z via office panel)

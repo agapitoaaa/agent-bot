@@ -1,0 +1,2 @@
+{"ts": "2026-11-22T09:12:41+00:00", "run_id": "product-pipeline-20261122-091241", "type": "run_started", "flow": "product-pipeline", "msg": "project: agent spend lens (P2 approved)"}
+{"ts": "2026-11-22T09:12:41+00:00", "run_id": "product-pipeline-20261122-091241", "type": "step_started", "flow": "product-pipeline", "step": 2, "agent": "researcher", "msg": "researching P2 + competitor check"}

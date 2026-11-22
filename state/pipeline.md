@@ -2,10 +2,10 @@
 
 Maintained by `/tick`. One active project at a time.
 
-- Active project: none
-- Slug: -
-- Run id: scout-20261122-090747
-- Stage: awaiting idea sign-off (A1)
+- Active project: Local-first agent spend lens (idea P2)
+- Slug: agent-spend-lens
+- Run id: product-pipeline-20261122-091241
+- Stage: research brief
 - Retries this stage: 0
-- Last tick: 2026-11-22T09:09:09Z (manual, run in chat; scheduled task paused: no repo attached)
-- Notes: scout round 1 done, 5 pitches proposed (P1-P5)
+- Last tick: manual, run in chat (scheduled task paused: no repo attached)
+- Notes: idea P2 approved via office panel (A1). Brief must start with a competitor check, as flagged by the scout.

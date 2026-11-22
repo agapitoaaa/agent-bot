@@ -16,7 +16,7 @@ Scout round 2026-11-22 (focus: broad). Search tool returned many vendor blogs; s
 - **Effort:** M. **Main risk:** Thin moat; a big vendor (or a Claude Code/GitHub feature) could absorb it, and some free scripts may already exist (not checked).
 - **Confidence:** Medium-high on the need; unverified: existing competing tools, actual willingness to pay or install.
 
-### P2. Local-first agent spend lens: per-task token cost attribution from agent logs [proposed]
+### P2. Local-first agent spend lens: per-task token cost attribution from agent logs [approved]
 **Concept:** Reads local coding-agent session logs and shows cost by task/skill/subagent, detects runaway or wasteful sessions, with no cloud account needed.
 - **Trend evidence:** Complaints that token counts appear only at session end and are opaque ([WebProNews on Claude Code billing, undated](https://www.webpronews.com/claude-codes-hidden-cost-problem-developers-sound-the-alarm-over-anthropics-opaque-token-billing/)); bills rising despite lower token prices ([Elastic](https://www.elastic.co/blog/token-costs-ai-bills)); [LangChain, fix your coding agent bill](https://langchain.com/blog/fix-your-coding-agent-bill); [1Password, AI spend hangover](https://1password.com/blog/how-to-survive-the-ai-spend-hangover); [Kilo Code on spending caps](https://dev.to/kilocode/stop-looking-for-ai-coding-spending-caps-42d9). Enterprise vendors (Datadog, IBM, WorkOS) are also publishing on this.
 - **Who / pain:** Individual devs and small teams who cannot see why a session was expensive.
