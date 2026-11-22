@@ -47,7 +47,7 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
 .card h2{margin:0 0 10px;font-family:var(--f-head);font-size:16px}
 #feed{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-family:var(--f-mono);font-size:12.5px;min-height:15em;align-content:start}
 #feed li{display:flex;gap:8px;align-items:baseline;min-width:0}
-#feed .t{color:var(--muted);flex:none;width:4.2em;font-variant-numeric:tabular-nums}
+#feed .t{color:var(--muted);flex:none;width:5.6em;font-variant-numeric:tabular-nums}
 #feed .ty{flex:none;background:var(--chip);border-radius:4px;padding:0 6px;font-size:11px}
 #feed .ty.mistake{color:var(--bad)} #feed .ty.lesson,#feed .ty.done{color:var(--good)} #feed .ty.approval{color:var(--warn)}
 #feed .tx{min-width:0;overflow-wrap:anywhere}
@@ -56,6 +56,12 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
 .mem{display:flex;gap:10px;align-items:flex-start;min-width:0}
 .dot{flex:none;width:22px;height:18px;border-radius:12px 12px 6px 6px;margin-top:3px;box-shadow:inset -2px -3px 0 rgba(0,0,0,.12)}
 .mem b{font-weight:600} .mem span{display:block;color:var(--muted);font-size:13px;line-height:1.35}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tools input[type=text]{all:unset;box-sizing:border-box;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:14px;min-width:0;flex:1 1 220px;color:var(--ink)}
+.tools input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tools label.chk{display:inline-flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}
+#status{margin:0;color:var(--muted);font-size:13.5px;min-height:1.5em}
+#status.err{color:var(--bad)}
 .legend{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
 .legend b{color:var(--ink);font-weight:600}
 </style>
@@ -63,7 +69,7 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
 <div class="wrap">
   <header>
     <h1>Slime Office</h1>
-    <p class="lede">Every agent is a slime with a desk. This is a scripted demo run: Nova scouts an idea, you approve it, work is handed down the line, Vex finds a bug, and the team huddles and learns a rule. The real view will play the same story from the run logs.</p>
+    <p class="lede">Every agent is a slime with a desk. Watch the scripted demo, or switch to Run log to play a real run: ideas, approvals, handoffs, bugs, huddles and lessons, straight from the event log the agents write.</p>
   </header>
 
   <div class="bar">
@@ -77,10 +83,26 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
     <button type="button" class="act" id="restart">Restart</button>
   </div>
 
+  <div class="bar">
+    <div><span class="lab">Source</span>
+      <span class="seg" role="group" aria-label="Source">
+        <button type="button" data-src="demo" aria-pressed="true">Demo</button>
+        <button type="button" data-src="log" aria-pressed="false">Run log</button>
+      </span></div>
+    <div class="tools" id="logtools" hidden>
+      <button type="button" class="act" id="loadSample">Load sample run</button>
+      <label class="act" for="file">Open .jsonl file</label><input type="file" id="file" accept=".jsonl,.json,.txt" hidden>
+      <input type="text" id="url" placeholder="Log URL, e.g. http://localhost:8000/runs/my-run.jsonl" aria-label="Log URL">
+      <button type="button" class="act" id="loadUrl">Load</button>
+      <label class="chk"><input type="checkbox" id="live"> Live (check every 3s)</label>
+    </div>
+  </div>
+  <p id="status">Demo: a scripted run. Switch to Run log to play real events.</p>
+
   <div class="stage" id="stage"><canvas id="cv" width="1920" height="1080"></canvas><div class="ov" id="ov"></div></div>
 
   <div class="grid">
-    <div class="card"><h2>Event feed <span style="font-weight:400;color:var(--muted);font-size:13px">(read from <code>runs/*.jsonl</code> in the live version)</span></h2><ol id="feed" style="list-style:none"></ol>
+    <div class="card"><h2>Event feed <span style="font-weight:400;color:var(--muted);font-size:13px">(from the demo, or from your run log)</span></h2><ol id="feed" style="list-style:none"></ol>
       <ul class="legend">
         <li><b>Paper</b> over a head: a handoff, or a request for you.</li>
         <li><b>?</b> over the crowned slime: an approval is waiting on you.</li>
@@ -115,20 +137,21 @@ var byId={}; CAST.forEach(function(c){byId[c.id]=c;}); byId.you=YOU;
 function side(c){return {x:c.x+1.55,y:c.y+0.6};}
 
 /* ---------- simulation (will be replaced by a reader of runs/*.jsonl) ---------- */
-function Sim(onLog,onReset){this.onLog=onLog;this.onReset=onReset;this.restart();}
+function Sim(onLog,onReset){this.onLog=onLog;this.onReset=onReset;this.mode='demo';this.restart();}
 Sim.prototype.restart=function(){
   this.t=0;this.timers=[];this.pend=false;this.a={};
+  this.queue=[];this.nextAt=0;this.huddle=false;this.atTable={};this.waiting={};this.total=0;this.played=0;
   var self=this;
   CAST.concat([YOU]).forEach(function(c){
     self.a[c.id]={id:c.id,c:c,px:c.x,py:c.y,mode:'sit',path:[],destSeat:true,cb:null,working:false,icon:null,bubble:null,face:1};
   });
   if(this.onReset)this.onReset();
-  runScript(this);
+  if(this.mode==='demo')runScript(this);
 };
 Sim.prototype.later=function(d,fn){this.timers.push({at:this.t+d,fn:fn});};
-Sim.prototype.log=function(type,text){if(this.onLog)this.onLog(this.t,type,text);};
+Sim.prototype.log=function(type,text,ts){if(this.onLog)this.onLog(this.t,type,text,ts);};
 Sim.prototype.say=function(id,text){this.a[id].bubble={text:text,until:this.t+3.2};};
-Sim.prototype.icon=function(id,n){this.a[id].icon=n;};
+Sim.prototype.icon=function(id,n,dur){var a=this.a[id];a.icon=n;a.iconUntil=(n&&dur)?this.t+dur:0;};
 Sim.prototype.work=function(id,on,msg){var a=this.a[id];a.working=on;if(on&&msg){this.log('step',byId[id].name+' working: '+msg);this.say(id,msg);}};
 Sim.prototype.setPending=function(on){this.pend=on;this.a.you.icon=on?'q':null;};
 Sim.prototype.walk=function(id,dest,cb){
@@ -159,12 +182,14 @@ Sim.prototype.handoff=function(from,to,msg,workMsg,next){
 };
 Sim.prototype.update=function(dt){
   this.t+=dt;
+  if(this.mode==='log'&&this.queue.length&&this.t>=this.nextAt){var ev=this.queue.shift();this.played++;this.apply(ev);this.nextAt=this.t+gapFor(ev);}
   for(var i=0;i<this.timers.length;i++){
     if(this.timers[i].at<=this.t){var f=this.timers[i].fn;this.timers.splice(i,1);i--;f();}
   }
   for(var id in this.a){
     var a=this.a[id];
     if(a.bubble&&a.bubble.until<this.t)a.bubble=null;
+    if(a.iconUntil&&a.iconUntil<this.t){a.icon=null;a.iconUntil=0;}
     if(a.mode==='walk'){
       var rem=SPEED*dt;
       while(rem>0&&a.path.length){
@@ -176,6 +201,85 @@ Sim.prototype.update=function(dt){
       if(!a.path.length){a.mode=a.destSeat?'sit':'stand';var cb=a.cb;a.cb=null;if(cb)cb();}
     }
   }
+};
+
+/* ---------- playing real events (runs/*.jsonl) ---------- */
+var ALIAS={'frontend-engineer':'frontend','backend-engineer':'backend','qa-engineer':'qa','release-engineer':'release','handoff-writer':'handoff','human':'you','user':'you','me':'you'};
+function aid(n){if(!n)return null;n=String(n).toLowerCase();if(ALIAS[n])return ALIAS[n];return byId[n]?n:null;}
+function nm(i){return i&&byId[i]?byId[i].name:'';}
+function shorten(m,n){m=String(m||'');n=n||46;return m.length>n?m.slice(0,n-1)+'\u2026':m;}
+function gapFor(ev){var ty=ev.type;if(ty==='handoff'||ty==='escalation'||ty==='huddle_started')return 3.4;if(ty==='chat'||ty==='mistake'||ty==='lesson')return 2.4;if(ty==='run_started')return 1;return 1.5;}
+Sim.prototype.apply=function(ev){
+  var ty=ev.type,ag=aid(ev.agent),to=aid(ev.to),msg=ev.msg||'';
+  this.log(ty,(ag?nm(ag)+(to?' -> '+nm(to):''):'')+(msg?(ag?': ':'')+msg:''),ev.ts);
+  var self=this;
+  switch(ty){
+    case 'run_started':
+      this.leaveTable();this.clearAsk();
+      CAST.forEach(function(c){var a=self.a[c.id];a.working=false;a.icon=null;if(a.mode!=='sit')self.walk(c.id,'seat');});
+      break;
+    case 'step_started':
+      if(!ag)break;
+      this.clearAsk();this.seatAgent(ag);this.work(ag,true,shorten(msg));break;
+    case 'step_done':
+      if(ag){this.work(ag,false);this.icon(ag,null);if(msg)this.say(ag,shorten(msg));}break;
+    case 'handoff':
+      this.clearAsk();
+      if(ag&&to&&ag!==to)this.deliver(ag,to,msg);break;
+    case 'escalation':
+      this.askYou(ag,msg);break;
+    case 'chat':
+      if(ag){this.say(ag,shorten(msg));if(this.huddle)this.joinTable(ag);}break;
+    case 'huddle_started':
+      this.huddle=true;this.joinTable(ag);this.joinTable(to);break;
+    case 'huddle_ended':case 'retro_done':
+      this.leaveTable();this.huddle=false;break;
+    case 'mistake':
+      if(ag){this.icon(ag,'alert',6);this.say(ag,shorten(msg));}break;
+    case 'lesson':
+      if(ag){this.icon(ag,'bulb',6);this.say(ag,shorten(msg));}break;
+    case 'run_done':
+      this.clearAsk();this.leaveTable();this.huddle=false;
+      CAST.concat([YOU]).forEach(function(c){self.work(c.id,false);self.icon(c.id,'star',8);});
+      this.say('handoff',shorten(msg||'Done'));break;
+  }
+};
+Sim.prototype.seatAgent=function(id){
+  var a=this.a[id];
+  if(this.atTable[id]!==undefined)delete this.atTable[id];
+  if(this.waiting[id])delete this.waiting[id];
+  if(a.mode!=='sit'&&!(a.mode==='walk'&&a.destSeat))this.walk(id,'seat');
+};
+Sim.prototype.deliver=function(from,to,msg){
+  var self=this,s=side(byId[to]);
+  this.work(from,false);this.icon(from,'doc');
+  this.walk(from,{x:s.x,y:s.y},function(){
+    self.say(from,shorten(msg||'Handoff'));
+    self.later(1.4,function(){self.icon(from,null);self.walk(from,'seat');});
+  });
+};
+Sim.prototype.askYou=function(ag,msg){
+  var self=this;
+  if(!ag||ag==='you'){this.setPending(true);this.say('you',shorten(msg||'Needs your sign-off'));return;}
+  this.work(ag,false);this.icon(ag,'doc');this.say(ag,shorten(msg||'Needs sign-off'));
+  this.waiting[ag]=true;
+  this.walk(ag,APPROVE,function(){self.setPending(true);});
+};
+Sim.prototype.clearAsk=function(){
+  var self=this;
+  if(this.pend)this.setPending(false);
+  Object.keys(this.waiting).forEach(function(id){delete self.waiting[id];self.icon(id,null);self.walk(id,'seat');});
+};
+Sim.prototype.joinTable=function(id){
+  if(!id||id==='you'||this.atTable[id]!==undefined)return;
+  var used=Object.keys(this.atTable).length;
+  this.atTable[id]=used%SLOTS.length;
+  this.work(id,false);this.walk(id,SLOTS[this.atTable[id]]);
+};
+Sim.prototype.leaveTable=function(){
+  var self=this;
+  Object.keys(this.atTable).forEach(function(id){self.walk(id,'seat');});
+  this.atTable={};
 };
 
 function runScript(s){
@@ -413,7 +517,7 @@ function makeOverlay(el){
       var below=a.mode==='sit'?P(a.px,a.py+1.25,6):P(a.px,a.py+0.2,-6);
       r.tag.style.left=below[0]/960*100+'%';r.tag.style.top=below[1]/540*100+'%';
       var hop=a.mode==='walk'?Math.abs(Math.sin(s.t*9))*10:0;
-      var top=P(a.px,a.py,seatZ(a)+(c.big?62:58)+hop+(a.icon?40:0));
+      var top=P(a.px,a.py,seatZ(a)+(c.big?62:58)+hop+(a.icon?32:0));
       r.bub.style.left=top[0]/960*100+'%';r.bub.style.top=top[1]/540*100+'%';
       var t=a.bubble?a.bubble.text:'';
       if(t!==r.txt){r.txt=t;r.bub.textContent=t;r.bub.hidden=!t;}
@@ -423,10 +527,13 @@ function makeOverlay(el){
 
 /* ---------- wiring ---------- */
 var feedEl=document.getElementById('feed');
-var sim=new Sim(function(t,type,text){
+var statusEl=document.getElementById('status');
+function setStatus(msg,err){statusEl.textContent=msg;statusEl.className=err?'err':'';}
+var sim=new Sim(function(t,type,text,ts){
   var li=document.createElement('li');
   li.innerHTML='<span class="t"></span><span class="ty"></span><span class="tx"></span>';
-  li.children[0].textContent=t.toFixed(1)+'s';li.children[1].textContent=type;li.children[1].className='ty '+type;li.children[2].textContent=text;
+  var d=ts?new Date(ts):null;
+  li.children[0].textContent=(d&&!isNaN(d))?d.toLocaleTimeString([],{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}):t.toFixed(1)+'s';li.children[1].textContent=type;li.children[1].className='ty '+type;li.children[2].textContent=text;
   feedEl.insertBefore(li,feedEl.firstChild);
   while(feedEl.children.length>10)feedEl.removeChild(feedEl.lastChild);
 },function(){feedEl.textContent='';});
@@ -438,14 +545,14 @@ CAST.concat([YOU]).forEach(function(c){
   var d=document.createElement('div');d.className='mem';
   d.innerHTML='<i class="dot"></i><div><b></b> <small style="color:var(--muted)"></small><span></span></div>';
   d.querySelector('.dot').style.background=c.body;
-  d.querySelector('b').textContent=c.name;d.querySelector('small').textContent=c.role+' · '+c.acc;d.querySelector('span').textContent=c.blurb;
+  d.querySelector('b').textContent=c.name;d.querySelector('small').textContent=c.role+' \u00b7 '+c.acc;d.querySelector('span').textContent=c.blurb;
   roster.appendChild(d);
 });
 var speed=1,playing=!window.matchMedia('(prefers-reduced-motion: reduce)').matches,last=0;
 function frame(ts){
   var dt=last?Math.min(0.05,(ts-last)/1000):0;last=ts;
   if(playing)sim.update(dt*speed);
-  drawIso(ctx,sim);overlay(sim);requestAnimationFrame(frame);
+  drawIso(ctx,sim);overlay(sim);refreshStatus();requestAnimationFrame(frame);
 }
 document.querySelectorAll('[data-speed]').forEach(function(b){
   b.addEventListener('click',function(){speed=+b.getAttribute('data-speed');b.parentNode.querySelectorAll('button').forEach(function(o){o.setAttribute('aria-pressed',String(o===b));});});
@@ -453,7 +560,64 @@ document.querySelectorAll('[data-speed]').forEach(function(b){
 var playBtn=document.getElementById('play');
 function syncPlay(){playBtn.textContent=playing?'Pause':'Play';}
 playBtn.addEventListener('click',function(){playing=!playing;syncPlay();});
-document.getElementById('restart').addEventListener('click',function(){sim.restart();});
+/* sources: demo script, or a run log (file, sample, URL, live) */
+var LOG={events:[],label:''},liveTimer=null;
+function parseLog(text){
+  var ev=[];text.split(/\r?\n/).forEach(function(l){l=l.trim();if(!l)return;try{var o=JSON.parse(l);if(o&&o.type)ev.push(o);}catch(e){}});
+  return ev;
+}
+function startReplay(){
+  sim.mode='log';sim.restart();
+  sim.queue=LOG.events.slice();sim.total=LOG.events.length;sim.played=0;sim.nextAt=0.6;
+}
+function loadText(text,label,keepLive){
+  var ev=parseLog(text);
+  if(!ev.length){setStatus('No events found in '+label+'. Expected one JSON object per line with a "type".',true);return;}
+  LOG={events:ev,label:label};
+  setSource('log',true);startReplay();
+  if(!keepLive)stopLive();
+}
+function setSource(src,keep){
+  document.querySelectorAll('[data-src]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-src')===src));});
+  document.getElementById('logtools').hidden=src!=='log';
+  if(src==='demo'){stopLive();sim.mode='demo';sim.restart();}
+  else if(!keep){sim.mode='log';sim.restart();setStatus('No log loaded yet. Load the sample, open a .jsonl file, or enter a URL.');}
+}
+function fetchText(u){return fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();});}
+function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null;}document.getElementById('live').checked=false;}
+function pollLive(u){
+  fetchText(u).then(function(txt){
+    var ev=parseLog(txt);
+    if(ev.length>LOG.events.length&&sim.mode==='log'){var add=ev.slice(LOG.events.length);LOG.events=ev;sim.queue=sim.queue.concat(add);sim.total=ev.length;}
+    else if(ev.length<LOG.events.length){LOG={events:ev,label:LOG.label};startReplay();}
+  }).catch(function(e){setStatus('Live update failed: '+e.message,true);});
+}
+document.querySelectorAll('[data-src]').forEach(function(b){b.addEventListener('click',function(){setSource(b.getAttribute('data-src'));});});
+document.getElementById('loadSample').addEventListener('click',function(){
+  fetchText('samples/sample-run.jsonl').then(function(txt){loadText(txt,'sample run');}).catch(function(e){setStatus('Could not load the sample ('+e.message+'). Try Open .jsonl file instead.',true);});
+});
+document.getElementById('file').addEventListener('change',function(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(){loadText(String(r.result),f.name);};r.onerror=function(){setStatus('Could not read that file.',true);};r.readAsText(f);e.target.value='';
+});
+document.getElementById('loadUrl').addEventListener('click',function(){
+  var u=document.getElementById('url').value.trim();if(!u){setStatus('Enter a log URL first.',true);return;}
+  fetchText(u).then(function(txt){loadText(txt,u,true);if(document.getElementById('live').checked){if(liveTimer)clearInterval(liveTimer);liveTimer=setInterval(function(){pollLive(u);},3000);}})
+    .catch(function(e){setStatus('Could not load that URL ('+e.message+'). It may be blocked here or need CORS; local servers work best.',true);});
+});
+document.getElementById('live').addEventListener('change',function(e){
+  var u=document.getElementById('url').value.trim();
+  if(!e.target.checked){if(liveTimer){clearInterval(liveTimer);liveTimer=null;}return;}
+  if(!u){setStatus('Enter a log URL and press Load to go live.',true);e.target.checked=false;return;}
+  if(liveTimer)clearInterval(liveTimer);liveTimer=setInterval(function(){pollLive(u);},3000);
+});
+document.getElementById('restart').addEventListener('click',function(){if(sim.mode==='log'&&LOG.events.length)startReplay();else sim.restart();});
+var lastStatus='';
+function refreshStatus(){
+  if(sim.mode!=='log'||!LOG.events.length)return;
+  var s='Playing '+LOG.label+': event '+sim.played+' of '+sim.total+(liveTimer?' (live)':'')+(sim.played>=sim.total&&!sim.queue.length?' \u00b7 finished':'');
+  if(s!==lastStatus){lastStatus=s;setStatus(s);}
+}
 syncPlay();
 if(!playing)sim.update(30);
 requestAnimationFrame(frame);

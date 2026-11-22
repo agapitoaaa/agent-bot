@@ -15,8 +15,8 @@ Goal: run the pipeline and the slime office on the laptop with real events inste
 
 ## 3. Wire the office view
 - [ ] Local server that serves `office-view/office.html` plus the latest `runs/*.jsonl` (or a `/events` endpoint)
-- [ ] Replace the scripted `Sim` with an event reader (map events to animations per `docs/orchestration.md`)
-- [ ] Live mode: poll or tail the newest log; replay mode: pick a past run
+- [x] Event reader built (Run log mode in `office.html`): replay, file, URL, live polling
+- [ ] Verify with a real run log (not just the sample)
 - [ ] Add an approvals panel reading `state/approvals.md`
 
 ## 4. Decide

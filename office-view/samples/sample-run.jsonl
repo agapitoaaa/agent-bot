@@ -1,0 +1,36 @@
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "run_started", "flow": "product-pipeline", "msg": "scout: broad"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_started", "flow": "product-pipeline", "step": 1, "agent": "researcher", "msg": "scouting trends (broad)"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_done", "step": 1, "agent": "researcher", "msg": "4 idea pitches"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "escalation", "agent": "researcher", "msg": "Idea sign-off: 4 pitches ready"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_started", "step": 2, "agent": "researcher", "msg": "writing research brief"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_done", "step": 2, "agent": "researcher", "msg": "research.md"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "handoff", "step": 2, "agent": "researcher", "to": "planner", "msg": "research.md"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_started", "step": 3, "agent": "planner", "msg": "writing the plan"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_done", "step": 3, "agent": "planner", "msg": "plan.md"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "escalation", "agent": "planner", "msg": "Plan sign-off"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "handoff", "step": 3, "agent": "planner", "to": "designer", "msg": "plan approved"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_started", "step": 4, "agent": "designer", "msg": "drawing flows"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_done", "step": 4, "agent": "designer", "msg": "design.md"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "handoff", "step": 4, "agent": "designer", "to": "frontend-engineer", "msg": "design.md"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_started", "step": 5, "agent": "frontend-engineer", "msg": "building UI"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_started", "step": 5, "agent": "backend-engineer", "msg": "building API"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_done", "step": 5, "agent": "backend-engineer", "msg": "API done"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_done", "step": 5, "agent": "frontend-engineer", "msg": "UI done"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "handoff", "step": 5, "agent": "frontend-engineer", "to": "qa-engineer", "msg": "dev notes"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "step_started", "step": 6, "agent": "qa-engineer", "msg": "running tests"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "mistake", "agent": "qa-engineer", "msg": "Empty state crashes"}
+{"ts": "2026-11-22T08:47:25+00:00", "run_id": "sample-run", "type": "huddle_started", "agent": "qa-engineer", "to": "frontend-engineer", "msg": "empty-state bug"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "chat", "agent": "qa-engineer", "to": "frontend-engineer", "msg": "Repro attached."}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "chat", "agent": "frontend-engineer", "to": "qa-engineer", "msg": "My miss: no empty-state test."}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "chat", "agent": "backend-engineer", "to": "qa-engineer", "msg": "I will add an API guard."}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "lesson", "agent": "frontend-engineer", "msg": "Always test empty states"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "retro_done", "msg": "fix planned, lessons saved"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "step_done", "step": 6, "agent": "qa-engineer", "msg": "All criteria pass"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "handoff", "step": 6, "agent": "qa-engineer", "to": "release-engineer", "msg": "test-report.md"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "step_started", "step": 7, "agent": "release-engineer", "msg": "preparing release"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "escalation", "agent": "release-engineer", "msg": "Deploy sign-off"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "step_started", "step": 7, "agent": "release-engineer", "msg": "deploying (approved)"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "handoff", "step": 7, "agent": "release-engineer", "to": "handoff-writer", "msg": "release.md"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "step_started", "step": 8, "agent": "handoff-writer", "msg": "writing handoff"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "step_done", "step": 8, "agent": "handoff-writer", "msg": "handoff.md"}
+{"ts": "2026-11-22T08:47:26+00:00", "run_id": "sample-run", "type": "run_done", "msg": "Handoff package delivered"}

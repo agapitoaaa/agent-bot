@@ -4,7 +4,7 @@ description: Blameless post-mortem when something went wrong; agents discuss, pl
 
 Run a blameless retro on: $ARGUMENTS
 
-1. **Facts**: gather what actually happened (run logs, outputs, test reports, the user's complaint). Create `runs/<RUN_ID>/discussions/<NN>-retro-<slug>.md` with a "What happened" section of facts and evidence only, no blame. Log `mistake` (`--agent` = whoever's output was wrong, if known).
+1. **Facts**: gather what actually happened (run logs, outputs, test reports, the user's complaint). Create `runs/<RUN_ID>/discussions/<NN>-retro-<slug>.md` with a "What happened" section of facts and evidence only, no blame. Log `mistake` (`--agent` = whoever's output was wrong, if known), then `huddle_started` (`--agent`/`--to` = two involved agents) so the office view gathers the team.
 2. **Round 1, accounts**: delegate to each involved agent (plus whoever caught it), one at a time. Each reads the transcript and their memory, then appends: what I did and why, what I'd do differently, what I needed that I didn't have.
 3. **Round 2, root cause and plan**: delegate again, one at a time. Each responds to others by name and proposes root cause(s) and fix steps. Log a `chat` per turn.
 4. **Synthesize**: root cause (process, not person), fix plan with owner per step, and 1-3 preventive rules. If the fix touches deploy, spend, scope or anything outward-facing, get the user's approval first.

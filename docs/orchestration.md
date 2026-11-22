@@ -32,3 +32,14 @@ Write events with `python3 scripts/log_event.py` only.
 ## Guardrails
 - Drafts only for anything outward-facing (email, social, deploy, spend, legal).
 - Escalate instead of guessing.
+
+## Event conventions the office view relies on
+- `agent` / `to`: use the real agent names (`frontend-engineer`, `qa-engineer`, ...) or `you`. The view maps them to slimes.
+- `escalation` (agent + msg): the agent walks to the Approvals desk and waits; You gets a `?`. It clears on the next `step_started`, `handoff`, or `run_done`. Log it for every human checkpoint (idea, plan, deploy sign-off).
+- `huddle_started` (`--agent` and `--to` = first two participants): those agents go to the meeting table. Anyone who then `chat`s joins the table. `huddle_ended` or `retro_done` sends everyone back.
+- `mistake`, `lesson` (agent + msg): alert / lightbulb over that agent with the message as a bubble.
+- `handoff` (agent -> to): sender walks a paper to the receiver. The receiver starts working only on its own `step_started`.
+- Events with no known agent still show in the feed.
+
+## Playing logs in the office view
+`office-view/office.html` -> Source: Run log. Options: sample run, open a `.jsonl` file, or a URL (add Live to poll every 3s for appended events). A URL must allow CORS; the simplest live setup is a local server serving the repo (e.g. `python3 -m http.server` in the repo root, then `http://localhost:8000/runs/<run_id>.jsonl`). `office-view/samples/sample-run.jsonl` is a full example made with `scripts/log_event.py`.
