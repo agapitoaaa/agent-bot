@@ -12,5 +12,6 @@ The orchestrator is the main Claude session (acting as Chief of Staff via `/run-
 | testing | qa-engineer | QA Engineer (stage 5). Use after development to test against acceptance criteria and review code quality and security basics. |
 | execution | release-engineer | Release Engineer (stage 6). Use after QA passes to build, package, and prepare deployment. Never deploys without human approval. |
 | handoff | handoff-writer | Handoff Writer (stage 7). Use last to write the product handoff package: README, usage, architecture, known issues, next steps. |
+| trading | trader | Ledger (paper-only trading research agent). Learns markets, scours the web for evidence, pre-registers hypotheses, proposes paper orders through the risk guard. Never trades real money. |
 
 The larger 38-role company (executives, marketing, sales, finance, legal...) was removed to keep this lean; it lives in git history (commit aa7c0f8) if we want to bring back departments.

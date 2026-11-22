@@ -1,0 +1,2 @@
+{"ts": "2026-11-22T11:09:20+00:00", "run_id": "trader-knowledge-20261122-110920", "type": "run_started", "flow": "trader-research", "msg": "strategies + information sources for Ledger"}
+{"ts": "2026-11-22T11:09:20+00:00", "run_id": "trader-knowledge-20261122-110920", "type": "step_started", "agent": "researcher", "msg": "cataloguing strategies, patterns and sources"}
