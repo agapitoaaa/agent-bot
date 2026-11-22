@@ -31,3 +31,9 @@ Request format (appended by `/tick`):
 - Summary: Plan for a paper-trading-only trader agent (docs/trader-bot-plan.md). Choose phase-1 market (us-equities recommended) and answer the questions in the note. Approval starts the foundation phase only; real money is out of scope without a separate approval.
 - Decision: approve; market = both (US stocks + crypto); no note given (answered 2026-11-22T09:28:18Z via office panel)
 
+### A4: plan | Ledger: path to real money, for the Philippines
+- Status: open
+- Asked: 2026-11-22T09:35:57Z
+- Summary: Readiness roadmap (docs/trader-live-readiness.md) and platform research (docs/trader-platforms.md). Choose: assisted live (recommended), API live later, or paper only. No live trading happens in any option without separate approvals.
+- Decision:
+
