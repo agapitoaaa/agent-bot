@@ -13,3 +13,6 @@ Steering research: `ideas/focus.md` says `broad` by default. Put specific topics
 
 ## Answering from the office page
 Requests are mirrored to the office artifact's database (`approvals` collection, readable/writable only by the owner and editors). The page shows them with Approve / Park / Reject / Request changes. Decisions are saved there, and the next `/tick` (or Claude in chat) copies them into `state/approvals.md` and acts, marking the doc `applied`. Doc fields: `kind, title, summary, status, asked, options[], recommended, source, decision, chosen, note, answeredAt, applied`.
+
+## Control room
+The office page also holds Actions (queue `run_next`, `scout`, or a `note` for the team; pause/resume autonomy) and Research focus. They write `commands`, `settings/autonomy` and `settings/focus` in the artifact database. Whoever runs the tick (the scheduled task once repo access is fixed, or Claude in chat) applies them and writes `status/pipeline` for the Pipeline card.

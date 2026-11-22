@@ -92,6 +92,28 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
 .dec.approve{color:var(--good)} .dec.reject{color:var(--bad)} .dec.park,.dec.changes{color:var(--warn)}
 #apdone summary{cursor:pointer;font-weight:600;font-size:14px;margin:6px 0 10px}
 .empty{margin:0;padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:14px}
+.stages{list-style:none;display:flex;flex-wrap:wrap;gap:6px;padding:0;margin:10px 0 0}
+.stages li{font-size:12px;padding:3px 10px;border-radius:99px;background:var(--chip);color:var(--muted)}
+.stages li.done{color:var(--good)} .stages li.now{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.pipe-main{margin:0;font-size:15px;overflow-wrap:anywhere}
+.pipe-sub{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.stack{display:grid;gap:10px}
+.field{all:unset;box-sizing:border-box;width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:14px;color:var(--ink);white-space:pre-wrap}
+.field:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+textarea.field{min-height:4em}
+.ctlmsg{margin:0;font-size:13px;color:var(--muted);min-height:1.3em}
+.ctlmsg.err{color:var(--bad)}
+.cmds{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13.5px}
+.cmds li{display:flex;gap:8px;align-items:baseline;min-width:0}
+.cmds .tx{min-width:0;overflow-wrap:anywhere}
+.cmds .st{flex:none;font-size:11px;font-weight:600;padding:0 8px;border-radius:99px;background:var(--chip);color:var(--muted)}
+.cmds .st.done{color:var(--good)}
+.docs{display:grid;gap:8px}
+.docs details{border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
+.docs summary{cursor:pointer;font-weight:600;font-size:14px}
+.docs pre{margin:8px 0 2px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f-mono);font-size:12.5px;line-height:1.5;max-height:55vh;overflow:auto}
 .legend{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
 .legend b{color:var(--ink);font-weight:600}
 </style>
@@ -132,12 +154,52 @@ h1{font-family:var(--f-head);font-size:clamp(24px,4vw,34px);margin:0;letter-spac
 
   <div class="stage" id="stage"><canvas id="cv" width="1920" height="1080"></canvas><div class="ov" id="ov"></div></div>
 
+  <section class="card" id="pipe" aria-labelledby="pi-h">
+    <h2 id="pi-h">Pipeline</h2>
+    <p class="pipe-main" id="pipemain">No status yet. It appears after the next run.</p>
+    <p class="pipe-sub" id="pipesub"></p>
+    <ol class="stages" id="stages"></ol>
+  </section>
+
   <section class="card" id="approvals" aria-labelledby="ap-h">
     <h2 id="ap-h">Approvals <span class="cnt" id="apcount">0</span></h2>
     <p class="apnote" id="apnote">Loading proposals&hellip;</p>
     <div id="aplist"></div>
     <details id="apdone" hidden><summary>Answered (<span id="apdn">0</span>)</summary><div id="apdonelist"></div></details>
   </section>
+
+  <div class="grid2">
+    <section class="card" id="actions" aria-labelledby="ac-h">
+      <h2 id="ac-h">Actions</h2>
+      <div class="stack">
+        <div class="btns">
+          <button type="button" class="btn go" id="cmdRun">Run next step</button>
+          <button type="button" class="btn" id="cmdScout">Scout for ideas now</button>
+          <button type="button" class="btn" id="pauseBtn">Pause autonomy</button>
+        </div>
+        <label for="msg" class="apnote" style="margin:0">Message to the team (becomes a note the agents read)</label>
+        <textarea class="field" id="msg" rows="2" placeholder="e.g. Keep the first version CLI-only"></textarea>
+        <div class="btns"><button type="button" class="btn" id="cmdMsg">Send message</button></div>
+        <p class="ctlmsg" id="ctlmsg">Commands run the next time Claude works on the repo: the scheduled task once it is working, or when you message Claude in chat.</p>
+        <ul class="cmds" id="cmdlist"></ul>
+      </div>
+    </section>
+    <section class="card" id="focuscard" aria-labelledby="fo-h">
+      <h2 id="fo-h">Research focus</h2>
+      <div class="stack">
+        <p class="apnote" style="margin:0" id="focuscur">Current: broad (default).</p>
+        <label for="focusIn" class="apnote" style="margin:0">Topics to research, or leave empty for broad</label>
+        <input type="text" class="field" id="focusIn" placeholder="e.g. AI tools for freelancers; developer productivity">
+        <label for="consIn" class="apnote" style="margin:0">Constraints (audience, budget, tech, things to avoid)</label>
+        <textarea class="field" id="consIn" rows="2" placeholder="none"></textarea>
+        <div class="btns">
+          <button type="button" class="btn go" id="focusSave">Save focus</button>
+          <button type="button" class="btn" id="focusBroad">Back to broad</button>
+        </div>
+        <p class="ctlmsg" id="focusmsg"></p>
+      </div>
+    </section>
+  </div>
 
   <div class="grid">
     <div class="card"><h2>Event feed <span style="font-weight:400;color:var(--muted);font-size:13px">(from the demo, or from your run log)</span></h2><ol id="feed" style="list-style:none"></ol>
@@ -607,6 +669,11 @@ function buildRequest(id,d,docRef,canWrite){
   hd.appendChild(el('span','meta',open?fmtDate(d.asked):fmtDate(d.answeredAt)));
   card.appendChild(hd);
   if(d.summary)card.appendChild(el('p','sum',d.summary));
+  if(Array.isArray(d.docs)&&d.docs.length){
+    var dw=el('div','docs');
+    d.docs.forEach(function(x){var dt=document.createElement('details');dt.appendChild(el('summary','',x.title||'Document'));dt.appendChild(el('pre','',x.text||''));dw.appendChild(dt);});
+    card.appendChild(dw);
+  }
   if(!open){
     if(d.note)card.appendChild(el('p','sum','Your note: '+d.note));
     if(canWrite){var rb=el('button','btn','Reopen');rb.type='button';rb.addEventListener('click',function(){docRef.update({status:'open',decision:null,chosen:null,answeredAt:null,applied:null}).catch(function(){});});card.appendChild(rb);}
@@ -664,6 +731,65 @@ function renderApprovals(snap,db,canWrite){
   updateCounts(nOpen,nDone);
   setApNote(canWrite?'Your decisions are saved here. The next scheduled run, or a message to Claude, applies them to the repo.':'Read-only: you need edit access on this page to answer.');
 }
+var STAGES=['Scout','Idea sign-off','Research','Plan','Plan sign-off','Design','Build','Test','Release','Deploy sign-off','Handoff'];
+function setMsg(id,msg,err){var e=document.getElementById(id);e.textContent=msg;e.className='ctlmsg'+(err?' err':'');}
+function initControls(db,canWrite){
+  var ids=['cmdRun','cmdScout','pauseBtn','cmdMsg','focusSave','focusBroad','msg','focusIn','consIn'];
+  if(!canWrite){ids.forEach(function(i){var e=document.getElementById(i);e.setAttribute('aria-disabled','true');if(e.tagName!=='BUTTON')e.disabled=true;});setMsg('ctlmsg','Read-only: you need edit access to use these controls.');}
+  function guard(fn){return function(){if(!canWrite)return;fn();};}
+  function queue(kind,text){
+    var doc={kind:kind,status:'queued',at:new Date().toISOString()};if(text)doc.text=text;
+    return db.collection('commands').add(doc).then(function(){setMsg('ctlmsg','Queued. It runs the next time Claude works on the repo.');}).catch(function(e){setMsg('ctlmsg','Could not queue ('+((e&&e.code)||'error')+'). Try again.',true);});
+  }
+  document.getElementById('cmdRun').addEventListener('click',guard(function(){queue('run_next');}));
+  document.getElementById('cmdScout').addEventListener('click',guard(function(){queue('scout');}));
+  document.getElementById('cmdMsg').addEventListener('click',guard(function(){
+    var m=document.getElementById('msg'),v=m.value.trim();if(!v){setMsg('ctlmsg','Write a message first.',true);return;}
+    queue('note',v).then(function(){m.value='';});
+  }));
+  var paused=false;
+  document.getElementById('pauseBtn').addEventListener('click',guard(function(){
+    db.doc('settings/autonomy').set({paused:!paused,updatedAt:new Date().toISOString()}).catch(function(e){setMsg('ctlmsg','Could not save ('+((e&&e.code)||'error')+').',true);});
+  }));
+  db.doc('settings/autonomy').onSnapshot(function(s){
+    paused=!!(s.exists&&s.data().paused);
+    var b=document.getElementById('pauseBtn');b.textContent=paused?'Resume autonomy':'Pause autonomy';
+  },function(){});
+  function saveFocus(broad){
+    var f=broad?'':document.getElementById('focusIn').value.trim(),c=broad?'':document.getElementById('consIn').value.trim();
+    db.doc('settings/focus').set({focus:f||'broad',constraints:c,updatedAt:new Date().toISOString(),applied:false})
+      .then(function(){setMsg('focusmsg','Saved. The researcher uses it from the next scouting round.');if(broad){document.getElementById('focusIn').value='';document.getElementById('consIn').value='';}})
+      .catch(function(e){setMsg('focusmsg','Could not save ('+((e&&e.code)||'error')+').',true);});
+  }
+  document.getElementById('focusSave').addEventListener('click',guard(function(){saveFocus(false);}));
+  document.getElementById('focusBroad').addEventListener('click',guard(function(){saveFocus(true);}));
+  var filled=false;
+  db.doc('settings/focus').onSnapshot(function(s){
+    var d=s.exists?s.data():null,f=d&&d.focus&&d.focus!=='broad'?d.focus:'broad';
+    document.getElementById('focuscur').textContent='Current: '+(f==='broad'?'broad (default)':f)+(d&&d.constraints?'. Constraints: '+d.constraints:'')+(d&&d.applied===false?'  (will apply at the next run)':'');
+    if(!filled){filled=true;if(f!=='broad')document.getElementById('focusIn').value=f;if(d&&d.constraints)document.getElementById('consIn').value=d.constraints;}
+  },function(){});
+  db.collection('commands').orderBy('at','desc').limit(6).onSnapshot(function(snap){
+    var ul=document.getElementById('cmdlist');ul.textContent='';
+    snap.docs.forEach(function(s){
+      if(!s.exists)return;var d=s.data(),li=document.createElement('li');
+      var label={run_next:'Run next step',scout:'Scout for ideas',note:'Message'}[d.kind]||d.kind;
+      li.appendChild(el('span','st'+(d.status==='done'?' done':''),d.status||'queued'));
+      li.appendChild(el('span','tx',label+(d.text?': '+d.text:'')+(d.result?' \u2192 '+d.result:'')));
+      ul.appendChild(li);
+    });
+  },function(){});
+  db.doc('status/pipeline').onSnapshot(function(s){
+    var main=document.getElementById('pipemain'),sub=document.getElementById('pipesub'),st=document.getElementById('stages');
+    st.textContent='';
+    if(!s.exists){return;}
+    var d=s.data();
+    main.textContent=(d.project?d.project+' \u00b7 ':'')+(d.stage||'')+(d.waiting?'. Waiting on you: '+d.waiting:'');
+    sub.textContent=(d.note?d.note+' ':'')+(d.updatedAt?'Updated '+fmtDate(d.updatedAt)+'.':'');
+    var idx=typeof d.stageIndex==='number'?d.stageIndex:-1;
+    STAGES.forEach(function(n,i){st.appendChild(el('li',i<idx?'done':(i===idx?'now':''),n));});
+  },function(){});
+}
 document.getElementById('goap').addEventListener('click',function(){document.getElementById('approvals').scrollIntoView({behavior:'smooth',block:'start'});});
 (async function(){
   var api=window.claude;
@@ -673,6 +799,7 @@ document.getElementById('goap').addEventListener('click',function(){document.get
   if(!db){setApNote('Approvals need a signed-in viewer with access to this page.');return;}
   var canWrite=true;
   try{if(user){canWrite=!!(await user.canEdit());}}catch(e){}
+  initControls(db,canWrite);
   var gotData=false,timer=setTimeout(function(){if(!gotData)setApNote("Can't reach saved approvals yet. They will appear when the connection is back.");},10000);
   try{
     db.collection('approvals').orderBy('asked','asc').onSnapshot(function(snap){

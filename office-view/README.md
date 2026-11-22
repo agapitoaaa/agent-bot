@@ -20,3 +20,6 @@ When adding an agent: add a cast entry (desk, body color, accessory) in `office.
 
 ## Live mode (built)
 `office.html` can play real run logs: sample, file, URL, or live polling. See `docs/orchestration.md`. Remaining for the laptop session: serve the repo locally and point the view at `runs/<run_id>.jsonl`. A cloud-published page can't read the repo.
+
+## Control room (office.html)
+The page is the human's single place to run the pipeline: Pipeline status, Approvals (with full documents), Actions (run next step, scout now, message the team, pause), Research focus. All state lives in the artifact database (`approvals`, `commands`, `settings/focus`, `settings/autonomy`, `status/pipeline`); Claude (or the tick) reads commands/settings and writes status. See `docs/autonomy.md`.

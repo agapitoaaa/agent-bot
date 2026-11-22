@@ -18,3 +18,10 @@ Request format (appended by `/tick`):
 - Asked: 2026-11-22T09:09:09Z
 - Summary: 5 pitches in ideas/backlog.md (P1-P5). Recommended: P1 Agent-file Linter. Evidence is mostly vendor blogs and trade press; demand is unverified for every idea. Run: scout-20261122-090747.
 - Decision: approve P2 (answered 2026-11-22T09:10:38Z via office panel)
+
+### A2: escalation | Research says P2 is mostly already built. How should we proceed?
+- Status: open
+- Asked: 2026-11-22T09:15:04Z
+- Summary: Generic P2 is served by free tools (ccusage, agentsight) and vendor features. Options: narrow (per-flow-stage cost + waste detection, recommended), internal tool only, or go back to the idea list. Full brief: runs/product-pipeline-20261122-091241/research.md
+- Decision:
+
