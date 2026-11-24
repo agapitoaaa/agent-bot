@@ -23,7 +23,7 @@ Request format (appended by `/tick`):
 - Status: answered
 - Asked: 2026-11-22T09:15:04Z
 - Summary: Generic P2 is served by free tools (ccusage, agentsight) and vendor features. Options: narrow (per-flow-stage cost + waste detection, recommended), internal tool only, or go back to the idea list. Full brief: runs/product-pipeline-20261122-091241/research.md
-- Decision: approve; chosen = narrow (per-flow-stage cost + waste detection) (answered 2026-11-24 via office panel)
+- Decision: approve narrow (per-flow-stage cost for multi-agent workflows + waste detection) (answered 2026-11-24T15:59:57Z via office panel)
 
 ### A3: plan | Plan: Ledger, the paper-trading agent
 - Status: answered
@@ -35,13 +35,13 @@ Request format (appended by `/tick`):
 - Status: answered
 - Asked: 2026-11-22T09:35:57Z
 - Summary: Readiness roadmap (docs/trader-live-readiness.md) and platform research (docs/trader-platforms.md). Choose: assisted live (recommended), API live later, or paper only. No live trading happens in any option without separate approvals.
-- Decision: approve; chosen = assisted (paper now, then assisted live; no live keys) (answered 2026-11-24 via office panel)
+- Decision: approve assisted (paper trading now, assisted live later: human places any real orders; no live API keys) (answered 2026-11-24T16:00:01Z via office panel)
 
 ### A5: plan | Ledger: what he studies and tests first
 - Status: answered
 - Asked: 2026-11-22T11:13:57Z
 - Summary: Curriculum, strategy catalog and source catalog (trading/knowledge/). Recommended: benchmark plus one trend experiment (max 3 parameter sets), with QA challenge. Approving only lets Ledger write pre-registered hypotheses; nothing is coded or run.
-- Decision: approve; chosen = baseline-trend (H0 benchmark + H1 trend, max 3 parameter sets) (answered 2026-11-24 via office panel)
+- Decision: approve baseline-trend (benchmark + one trend experiment, max 3 parameter sets, QA challenge before promotion) (answered 2026-11-24T16:00:15Z via office panel)
 
 
 ### A6: plan | Plan: agent-spend-lens (narrow: per-flow-stage cost + waste flags)
