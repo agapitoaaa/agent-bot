@@ -23,3 +23,6 @@ Goal: run the pipeline and the slime office on the laptop with real events inste
 - [ ] Keep the scheduled cloud ticks, run locally, or both
 - [ ] Merge the working branch to `main` (needs a PR)
 - [ ] Scout focus (`ideas/focus.md`) and cadence of ticks
+
+## Status 2026-11-24
+Live office built: see `docs/live.md` (cloud mirroring via `/mirror`, and `scripts/serve_office.py` for the laptop). Still to do on the laptop: run it against a real flow and tune what gets logged.

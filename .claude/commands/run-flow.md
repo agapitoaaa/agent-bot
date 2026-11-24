@@ -25,3 +25,5 @@ Subagents cannot spawn other subagents, so YOU (the main session) delegate every
 6. **Mistakes**: if a step fails, QA says "fix first", an agent's output contradicts an earlier one, or the user reports a problem, run the `/retro` procedure (`.claude/commands/retro.md`) before moving on. If agents disagree on approach, run the `/huddle` procedure.
 7. Drafts only: never send emails, post publicly, deploy, or spend money. Present those for human approval.
 8. Finish with `run_done`, and give the user a summary: steps completed, artifacts (paths), open questions, and decisions needing approval.
+
+After each stage group (and at `run_done` or any escalation), run the `/mirror` procedure so the live office shows the new events. If `ArtifactData` is unavailable, skip it; the laptop server still reads the logs directly.

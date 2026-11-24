@@ -154,8 +154,15 @@ textarea.field{min-height:4em}
     <div><span class="lab">Source</span>
       <span class="seg" role="group" aria-label="Source">
         <button type="button" data-src="demo" aria-pressed="true">Demo</button>
+        <button type="button" data-src="live" aria-pressed="false">Live</button>
         <button type="button" data-src="log" aria-pressed="false">Run log</button>
       </span></div>
+    <div class="tools" id="livetools" hidden>
+      <label for="runSel" class="lab" style="margin:0">Run</label>
+      <select id="runSel" class="field" style="width:auto;max-width:100%;min-width:12em" aria-label="Run to watch"></select>
+      <label class="chk"><input type="checkbox" id="follow" checked> Follow newest run</label>
+      <span class="apnote" id="livehint" style="margin:0"></span>
+    </div>
     <div class="tools" id="logtools" hidden>
       <button type="button" class="act" id="loadSample">Load sample run</button>
       <label class="act" for="file">Open .jsonl file</label><input type="file" id="file" accept=".jsonl,.json,.txt" hidden>
@@ -319,7 +326,7 @@ Sim.prototype.handoff=function(from,to,msg,workMsg,next){
 };
 Sim.prototype.update=function(dt){
   this.t+=dt;
-  if(this.mode==='log'&&this.queue.length&&this.t>=this.nextAt){var ev=this.queue.shift();this.played++;this.apply(ev);this.nextAt=this.t+gapFor(ev);}
+  if(this.mode==='log'&&this.queue.length&&this.t>=this.nextAt){var ev=this.queue.shift();this.played++;this.apply(ev,ev.__quiet);this.nextAt=this.t+(ev.__quiet?0.03:gapFor(ev));}
   for(var i=0;i<this.timers.length;i++){
     if(this.timers[i].at<=this.t){var f=this.timers[i].fn;this.timers.splice(i,1);i--;f();}
   }
@@ -347,10 +354,16 @@ function aid(n){if(!n)return null;n=String(n).toLowerCase();if(ALIAS[n])return A
 function nm(i){return i&&byId[i]?byId[i].name:'';}
 function shorten(m,n){m=String(m||'');n=n||46;return m.length>n?m.slice(0,n-1)+'\u2026':m;}
 function gapFor(ev){var ty=ev.type;if(ty==='handoff'||ty==='escalation'||ty==='huddle_started')return 3.4;if(ty==='chat'||ty==='mistake'||ty==='lesson')return 2.4;if(ty==='run_started')return 1;return 1.5;}
-Sim.prototype.apply=function(ev){
+Sim.prototype.apply=function(ev,quiet){
   var ty=ev.type,ag=aid(ev.agent),to=aid(ev.to),msg=ev.msg||'';
   this.log(ty,(ag?nm(ag)+(to?' -> '+nm(to):''):'')+(msg?(ag?': ':'')+msg:''),ev.ts);
   var self=this;
+  if(quiet){ /* catching up on history: update the feed and who is busy, no animation */
+    if(ty==='step_started'&&ag)this.a[ag].working=true;
+    else if(ty==='step_done'&&ag)this.a[ag].working=false;
+    else if(ty==='run_started'||ty==='run_done')CAST.forEach(function(c){self.a[c.id].working=false;});
+    return;
+  }
   switch(ty){
     case 'run_started':
       this.leaveTable();this.clearAsk();
@@ -926,6 +939,12 @@ document.getElementById('goap').addEventListener('click',openApprovals);
   var canWrite=true;
   try{if(user){canWrite=!!(await user.canEdit());}}catch(e){}
   initControls(db,canWrite);
+  try{
+    db.collection('runlogs').onSnapshot(function(snap){
+      var map={};snap.docs.forEach(function(s){if(s.exists){var d=s.data();if(d&&Array.isArray(d.events))map[s.id]=d.events;}});
+      ingestRuns(map);enterLiveIfFirst();
+    },function(){});
+  }catch(e){}
   var gotData=false,timer=setTimeout(function(){if(!gotData)setApNote("Can't reach saved approvals yet. They will appear when the connection is back.");},10000);
   try{
     db.collection('approvals').orderBy('asked','asc').onSnapshot(function(snap){
@@ -966,7 +985,10 @@ function loadText(text,label,keepLive){
 function setSource(src,keep){
   document.querySelectorAll('[data-src]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-src')===src));});
   document.getElementById('logtools').hidden=src!=='log';
+  document.getElementById('livetools').hidden=src!=='live';
+  liveActive=(src==='live');
   if(src==='demo'){stopLive();sim.mode='demo';sim.restart();}
+  else if(src==='live'){stopLive();var ids=runIdsNewestFirst();if(ids.length)selectRun(curRun&&RUNS[curRun]?curRun:ids[0]);else{sim.mode='log';sim.restart();setStatus(LOCAL?'Waiting for run logs from the local server...':'No live runs yet. Runs appear here once Claude mirrors them.');}}
   else if(!keep){sim.mode='log';sim.restart();setStatus('No log loaded yet. Load the sample, open a .jsonl file, or enter a URL.');}
 }
 function fetchText(u){return fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();});}
@@ -978,7 +1000,7 @@ function pollLive(u){
     else if(ev.length<LOG.events.length){LOG={events:ev,label:LOG.label};startReplay();}
   }).catch(function(e){setStatus('Live update failed: '+e.message,true);});
 }
-document.querySelectorAll('[data-src]').forEach(function(b){b.addEventListener('click',function(){setSource(b.getAttribute('data-src'));});});
+document.querySelectorAll('[data-src]').forEach(function(b){b.addEventListener('click',function(){userChose=true;setSource(b.getAttribute('data-src'));});});
 document.getElementById('loadSample').addEventListener('click',function(){
   fetchText('samples/sample-run.jsonl').then(function(txt){loadText(txt,'sample run');}).catch(function(e){setStatus('Could not load the sample ('+e.message+'). Try Open .jsonl file instead.',true);});
 });
@@ -998,10 +1020,59 @@ document.getElementById('live').addEventListener('change',function(e){
   if(liveTimer)clearInterval(liveTimer);liveTimer=setInterval(function(){pollLive(u);},3000);
 });
 document.getElementById('restart').addEventListener('click',function(){if(sim.mode==='log'&&LOG.events.length)startReplay();else sim.restart();});
+/* ---------- live source: runs from the shared database (cloud) or the local server (laptop) ---------- */
+var RUNS={},curRun=null,liveActive=false,userChose=false,followNew=true,LINES={};
+var LOCAL=/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+function lastTs(id){var e=RUNS[id];return e&&e.length?(e[e.length-1].ts||''):'';}
+function runIdsNewestFirst(){return Object.keys(RUNS).sort(function(a,b){return lastTs(b)<lastTs(a)?-1:lastTs(b)>lastTs(a)?1:0;});}
+function fillSelect(){
+  var sel=document.getElementById('runSel'),ids=runIdsNewestFirst();sel.textContent='';
+  ids.forEach(function(id){var o=document.createElement('option');o.value=id;var lt=lastTs(id),d=lt?new Date(lt):null;o.textContent=id+' ('+RUNS[id].length+' events'+(d&&!isNaN(d)?', '+d.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}):'')+')';sel.appendChild(o);});
+  if(curRun)sel.value=curRun;
+}
+function startLive(events){
+  sim.mode='log';sim.restart();
+  var n=events.length,keep=8;
+  sim.queue=events.map(function(e,i){return i<n-keep?Object.assign({__quiet:true},e):e;});
+  sim.total=n;sim.played=0;sim.nextAt=0.4;LOG={events:events.slice(),label:'live: '+curRun};
+}
+function selectRun(id){curRun=id;fillSelect();startLive(RUNS[id].slice());}
+function ingestRuns(map){
+  var changed=false;
+  Object.keys(map).forEach(function(id){
+    var ev=map[id];if(!ev||!ev.length)return;
+    if(!RUNS[id]){RUNS[id]=ev.slice();changed=true;return;}
+    if(ev.length>RUNS[id].length){
+      var add=ev.slice(RUNS[id].length);RUNS[id]=ev.slice();changed=true;
+      if(liveActive&&id===curRun&&sim.mode==='log'){sim.queue=sim.queue.concat(add);sim.total=ev.length;LOG.events=ev.slice();}
+    }else if(ev.length<RUNS[id].length){RUNS[id]=ev.slice();changed=true;if(liveActive&&id===curRun)startLive(ev.slice());}
+  });
+  if(!changed)return;
+  var ids=runIdsNewestFirst();
+  if(liveActive&&ids.length&&(!curRun||(followNew&&ids[0]!==curRun)))selectRun(ids[0]);
+  else fillSelect();
+  document.getElementById('livehint').textContent=(LOCAL?'Reading real logs from this machine, live. ':'Mirrored by Claude; may lag a little. ')+ids.length+' runs.';
+}
+function enterLiveIfFirst(){if(!userChose&&!liveActive&&Object.keys(RUNS).length){setSource('live');}}
+document.getElementById('runSel').addEventListener('change',function(e){userChose=true;if(!liveActive)setSource('live');selectRun(e.target.value);});
+document.getElementById('follow').addEventListener('change',function(e){followNew=e.target.checked;});
+window.__ingestRuns=function(m){ingestRuns(m);enterLiveIfFirst();};
+if(LOCAL){
+  var pollingLocal=false;
+  var pollLocal=function(){
+    if(pollingLocal)return;pollingLocal=true;
+    fetch('/api/runs',{cache:'no-store'}).then(function(r){return r.json();}).then(function(list){
+      var jobs=list.filter(function(r){return LINES[r.id]!==r.lines;});
+      return Promise.all(jobs.map(function(r){return fetch('/runs/'+r.id+'.jsonl',{cache:'no-store'}).then(function(x){return x.text();}).then(function(txt){LINES[r.id]=r.lines;return [r.id,parseLog(txt)];});}));
+    }).then(function(pairs){var map={};pairs.forEach(function(p){map[p[0]]=p[1];});if(pairs.length){ingestRuns(map);enterLiveIfFirst();}pollingLocal=false;})
+      .catch(function(){pollingLocal=false;document.getElementById('livehint').textContent='Local server not reachable.';});
+  };
+  pollLocal();setInterval(pollLocal,2000);
+}
 var lastStatus='';
 function refreshStatus(){
   if(sim.mode!=='log'||!LOG.events.length)return;
-  var s='Playing '+LOG.label+': event '+sim.played+' of '+sim.total+(liveTimer?' (live)':'')+(sim.played>=sim.total&&!sim.queue.length?' \u00b7 finished':'');
+  var s='Playing '+LOG.label+': event '+sim.played+' of '+sim.total+((liveTimer||liveActive)?' (live)':'')+(sim.played>=sim.total&&!sim.queue.length?' \u00b7 finished':'');
   if(s!==lastStatus){lastStatus=s;setStatus(s);}
 }
 syncPlay();

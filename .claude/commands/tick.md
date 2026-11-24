@@ -16,6 +16,8 @@ The human answers from the office page, which stores requests in the artifact da
 - (db) Control room: read collection `commands` (status `queued`): `run_next` = continue the pipeline this tick (default behaviour); `scout` = run one scout round now even if proposals are pending; `note` = append the text to `state/notes.md` (agents read it) . Mark each `status: done` with a short `result`. Read doc `settings/focus`: if `applied` is not true, write it into `ideas/focus.md` (focus + constraints) and set `applied: true`. Read doc `settings/autonomy`: if `paused` is true, do nothing this tick except report. At the end of every tick, write doc `status/pipeline` `{project, stage, stageIndex (0-10 into: Scout, Idea sign-off, Research, Plan, Plan sign-off, Design, Build, Test, Release, Deploy sign-off, Handoff), waiting, note, updatedAt}`.
 - (db) When a request benefits from reading a document before deciding (research brief, plan, release plan), include it in the request doc as `docs:[{title,text}]`.
 
+- (db) Live office: at the end of every tick (and after any step that logged events) run the `/mirror` procedure (`.claude/commands/mirror.md`) so new events appear in the office page.
+
 ## 1. Apply answered approvals (in this order, handle all that apply)
 For each approval with a non-empty `Decision:` and Status `open`: mark it `answered`, then:
 - **idea**: `approve` -> set the idea `approved` in the backlog; `reject`/`park` -> set accordingly and record any feedback for the next scout. 
