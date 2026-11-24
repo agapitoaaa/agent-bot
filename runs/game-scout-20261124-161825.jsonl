@@ -5,3 +5,6 @@
 {"ts": "2026-11-24T16:32:56+00:00", "run_id": "game-scout-20261124-161825", "type": "step_started", "agent": "researcher", "msg": "G1 deep dive incl. Steam Market (A7 changes)"}
 {"ts": "2026-11-24T16:36:28+00:00", "run_id": "game-scout-20261124-161825", "type": "step_done", "agent": "researcher", "msg": "g1-deep-dive.md (Steam Market)"}
 {"ts": "2026-11-24T16:36:28+00:00", "run_id": "game-scout-20261124-161825", "type": "escalation", "agent": "researcher", "msg": "Slime Strip + Steam Market scope (A8)"}
+{"ts": "2026-11-24T16:50:07+00:00", "run_id": "game-scout-20261124-161825", "type": "step_done", "agent": "designer", "msg": "game-design.md (Gloamway)"}
+{"ts": "2026-11-24T16:50:07+00:00", "run_id": "game-scout-20261124-161825", "type": "step_done", "agent": "planner", "msg": "production-plan.md"}
+{"ts": "2026-11-24T16:50:07+00:00", "run_id": "game-scout-20261124-161825", "type": "escalation", "agent": "planner", "msg": "Gloamway full pitch for review (A10)"}

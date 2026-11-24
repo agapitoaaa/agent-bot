@@ -68,3 +68,10 @@ Request format (appended by `/tick`):
 - Asked: 2026-11-24T16:50:00Z
 - Summary: Plan at runs/game-slime-strip-20261124/plan.md. Godot 4.x, code-drawn art, M0 window-tech spike first, then first playable. Market is a marked v1.x milestone (Option A), item model built Market-ready. Decisions: price model (free vs ~$5-8); Steam Direct $100 + Steamworks account and who holds the identity (agents never spend); publishing sign-off; v1.x Market go-ahead; a Windows machine with 2 monitors for testing; whether Unity may be evaluated if M0 fails; regional/legal view on Market. Approve = start design and M0 spike only.
 - Decision:
+
+### A10: plan | Gloamway: full game pitch, design and production plan
+- Status: open
+- Asked: 2026-11-24T16:50:07Z
+- Summary: Full pitch for the owner's review (docs/game/): summary, design (Sage), production plan (Marlowe). Gloamway = lamplighter + slime familiar on a transparent taskbar strip; no Market in v1 (A8), Market-ready item model; first hard stop is a Windows machine for the window spike. Supersedes the Slime Strip plan A9 if approved.
+- Decision:
+

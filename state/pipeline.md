@@ -15,3 +15,4 @@ Maintained by `/tick`. One active project at a time.
 - 2026-11-24: A7 answered 'changes': owner wants more context on G1 Slime Strip and WANTS Steam Market trading. Nova deep-dive in progress.
 - 2026-11-24: G1 deep dive done; A8 (market scope) open.
 - 2026-11-24: A8 answered (scope C). Project game-slime-strip-20261124 (projects/slime-strip). Plan written; plan sign-off A9 open.
+- 2026-11-24: Full Gloamway pitch (design + production plan) ready for the owner's review: A10 open. A9 (Slime Strip plan) superseded if A10 approved.
