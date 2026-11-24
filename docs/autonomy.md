@@ -16,3 +16,6 @@ Requests are mirrored to the office artifact's database (`approvals` collection,
 
 ## Control room
 The office page also holds Actions (queue `run_next`, `scout`, or a `note` for the team; pause/resume autonomy) and Research focus. They write `commands`, `settings/autonomy` and `settings/focus` in the artifact database. Whoever runs the tick (the scheduled task once repo access is fixed, or Claude in chat) applies them and writes `status/pipeline` for the Pipeline card.
+
+## Why answering did not start work (and the fix)
+The panel only SAVES answers; nothing was listening. A chat session notices them only when it looks, and the scheduled task is marked paused (it still runs when fired manually). Fix (2026-11-24): the office page can start the scheduled task itself (connector "Claude Code Remote", tool `fire_trigger`, trigger `trig_01SFmKbvWeDb9LqiYAcXHiep`). Buttons: **Start work now**, and optional **Start automatically after I answer** (15 s after the last answer, at most once per 3 minutes; off switch in the Actions card). The first use asks for permission. Runs take the single-runner lock (`status/runner`) so two sessions do not collide (see `.claude/commands/tick.md`).

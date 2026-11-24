@@ -56,3 +56,9 @@ Request format (appended by `/tick`):
 - Summary: Nova's Steam scout (tags idle, loot, ARPG, desktop companion, adventure): five game pitches G1-G5 in ideas/backlog.md (Game track). Recommended: G1 Slime Strip, with G4 Slime Pal as a cheap first proof of the window technique.
 - Decision: changes: Give more context on Slime Strip. We want steam market trading (answered 2026-11-24T16:32:20Z via office panel)
 
+### A8: plan | Slime Strip with Steam Market trading: pick the market scope
+- Status: open
+- Asked: 2026-11-24T16:36:28Z
+- Summary: Nova's deep dive (runs/game-scout-20261124-161825/g1-deep-dive.md). Options: A tradable collectibles via playtime drops, no server (recommended); B server-authoritative loot; C no Market in v1. Approval starts a plan, not building; Steam Direct $100, hosting, publishing need explicit sign-off.
+- Decision:
+

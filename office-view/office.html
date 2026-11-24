@@ -198,10 +198,14 @@ textarea.field{min-height:4em}
           <button type="button" class="btn" id="cmdScout">Scout for ideas now</button>
           <button type="button" class="btn" id="pauseBtn">Pause autonomy</button>
         </div>
+        <div class="btns">
+          <button type="button" class="btn go" id="startWork">Start work now</button>
+          <label class="chk" style="display:inline-flex;gap:6px;align-items:center;font-size:14px;cursor:pointer"><input type="checkbox" id="autoStart" checked> Start automatically after I answer</label>
+        </div>
         <label for="msg" class="apnote" style="margin:0">Message to the team (becomes a note the agents read)</label>
         <textarea class="field" id="msg" rows="2" placeholder="e.g. Keep the first version CLI-only"></textarea>
         <div class="btns"><button type="button" class="btn" id="cmdMsg">Send message</button></div>
-        <p class="ctlmsg" id="ctlmsg">Commands run the next time Claude works on the repo: the scheduled task once it is working, or when you message Claude in chat.</p>
+        <p class="ctlmsg" id="ctlmsg">Your answers and commands are saved here. Work starts when a run picks them up: press Start work now, or leave auto-start on.</p>
         <ul class="cmds" id="cmdlist"></ul>
       </div>
     </section>
@@ -824,6 +828,7 @@ function buildRequest(id,d,docRef,canWrite){
     busy=true;err.hidden=true;
     [].forEach.call(btns.children,function(b){b.setAttribute('aria-disabled','true');});
     docRef.update({status:'answered',decision:decision,chosen:(decision==='approve'&&chosen)?chosen:null,note:text||null,answeredAt:new Date().toISOString(),applied:null})
+      .then(function(){autoStart('answered '+id);})
       .catch(function(e){busy=false;[].forEach.call(btns.children,function(b){b.removeAttribute('aria-disabled');});err.textContent='Could not save ('+((e&&e.code)||'error')+'). Try again.';err.hidden=false;});
   }
   [['Approve','go','approve'],['Park','','park'],['Reject','no','reject'],['Request changes','','changes']].forEach(function(b){
@@ -854,16 +859,45 @@ function renderApprovals(snap,db,canWrite){
   updateCounts(nOpen,nDone);
   setApNote(canWrite?'Your decisions are saved here. The next scheduled run, or a message to Claude, applies them to the repo.':'Read-only: you need edit access on this page to answer.');
 }
+var TRIGGER_ID='trig_01SFmKbvWeDb9LqiYAcXHiep',AUTO=true,autoTimer=null,lastFire=0;
+try{AUTO=localStorage.getItem('autoStart')!=='0';}catch(e){}
+function startWork(why){
+  var api=window.claude;
+  if(!api||!api.use){setMsg('ctlmsg','Starting work works only when this page is open in claude.ai.',true);return Promise.resolve();}
+  return api.use('mcp').then(function(mcp){
+    if(!mcp){setMsg('ctlmsg','Starting work is not available in this view. Tell Claude in chat instead.',true);return;}
+    lastFire=Date.now();setMsg('ctlmsg','Starting work...');
+    return mcp.callTool('Claude Code Remote','fire_trigger',{trigger_id:TRIGGER_ID,text:'Started from the office page ('+why+'). Read state/approvals.md, answered approvals and queued commands in the office database, then proceed per the tick procedure.'})
+      .then(function(){setMsg('ctlmsg','Work started. A run is picking up your answers; this page updates when it saves.');});
+  }).catch(function(e){
+    lastFire=0;var c=e&&e.code;
+    setMsg('ctlmsg',(c==='approval_required'||c==='not_in_manifest'||c==='consent_required')?'Starting work needs your permission for this page. Tap Start work now and allow it.':
+      (c==='server_not_connected'||c==='needs_reauth'||c==='selection_required')?'Connect (or reconnect) the "Claude Code Remote" connector in claude.ai Settings, Connectors.':
+      c==='blocked_by_policy'?'Your organization blocks starting runs from pages.':'Could not start work ('+(c||'error')+'). Tell Claude in chat instead.',true);
+  });
+}
+function autoStart(why){
+  if(!AUTO)return;
+  clearTimeout(autoTimer);
+  setMsg('ctlmsg','Saved. Starting work in 15 seconds (Start work now goes immediately; untick auto-start to stop this).');
+  autoTimer=setTimeout(function(){
+    if(Date.now()-lastFire<180000){setMsg('ctlmsg','Saved. A run started a moment ago and will pick this up.');return;}
+    startWork(why);
+  },15000);
+}
 var STAGES=['Scout','Idea sign-off','Research','Plan','Plan sign-off','Design','Build','Test','Release','Deploy sign-off','Handoff'];
 function setMsg(id,msg,err){var e=document.getElementById(id);e.textContent=msg;e.className='ctlmsg'+(err?' err':'');}
 function initControls(db,canWrite){
-  var ids=['cmdRun','cmdScout','pauseBtn','cmdMsg','focusSave','focusBroad','msg','focusIn','consIn'];
+  var ids=['startWork','cmdRun','cmdScout','pauseBtn','cmdMsg','focusSave','focusBroad','msg','focusIn','consIn'];
   if(!canWrite){ids.forEach(function(i){var e=document.getElementById(i);e.setAttribute('aria-disabled','true');if(e.tagName!=='BUTTON')e.disabled=true;});setMsg('ctlmsg','Read-only: you need edit access to use these controls.');}
   function guard(fn){return function(){if(!canWrite)return;fn();};}
   function queue(kind,text){
     var doc={kind:kind,status:'queued',at:new Date().toISOString()};if(text)doc.text=text;
-    return db.collection('commands').add(doc).then(function(){setMsg('ctlmsg','Queued. It runs the next time Claude works on the repo.');}).catch(function(e){setMsg('ctlmsg','Could not queue ('+((e&&e.code)||'error')+'). Try again.',true);});
+    return db.collection('commands').add(doc).then(function(){autoStart('queued '+kind);}).catch(function(e){setMsg('ctlmsg','Could not queue ('+((e&&e.code)||'error')+'). Try again.',true);});
   }
+  document.getElementById('startWork').addEventListener('click',guard(function(){clearTimeout(autoTimer);startWork('Start work now button');}));
+  var chk=document.getElementById('autoStart');chk.checked=AUTO;
+  chk.addEventListener('change',function(){AUTO=chk.checked;try{localStorage.setItem('autoStart',AUTO?'1':'0');}catch(e){}if(!AUTO)clearTimeout(autoTimer);});
   document.getElementById('cmdRun').addEventListener('click',guard(function(){queue('run_next');}));
   document.getElementById('cmdScout').addEventListener('click',guard(function(){queue('scout');}));
   document.getElementById('cmdMsg').addEventListener('click',guard(function(){

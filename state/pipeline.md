@@ -13,3 +13,4 @@ Maintained by `/tick`. One active project at a time.
 - New 2026-11-24: owner wants a PC game project (Steam-tag research by Nova first: idle, loot, ARPG, desktop companion, adventure).
 - 2026-11-24: A6 answered: spend-lens plan PARKED by the owner. Game scout done; idea sign-off A7 open (G1-G5).
 - 2026-11-24: A7 answered 'changes': owner wants more context on G1 Slime Strip and WANTS Steam Market trading. Nova deep-dive in progress.
+- 2026-11-24: G1 deep dive done; A8 (market scope) open.
