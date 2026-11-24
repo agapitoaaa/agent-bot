@@ -1,2 +1,4 @@
 {"ts": "2026-11-24T16:38:26+00:00", "run_id": "game-slime-strip-20261124", "type": "run_started", "flow": "product-pipeline", "msg": "Slime Strip (G1), Market scope C"}
 {"ts": "2026-11-24T16:38:26+00:00", "run_id": "game-slime-strip-20261124", "type": "step_started", "step": 2, "agent": "planner", "msg": "Plan for Slime Strip"}
+{"ts": "2026-11-24T16:39:43+00:00", "run_id": "game-slime-strip-20261124", "type": "step_done", "step": 2, "agent": "planner", "msg": "plan.md"}
+{"ts": "2026-11-24T16:39:43+00:00", "run_id": "game-slime-strip-20261124", "type": "escalation", "agent": "planner", "msg": "Plan sign-off (A9)"}
