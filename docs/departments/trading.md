@@ -1,7 +1,8 @@
 # Trading department
 
 Staff: **Ledger** (`trader`), the department's only employee for now. Reports to: the owner (you).
-Status: paper only. No live trading, no live keys, no money movement.
+Status: **PARKED by the owner on 2026-11-24** (focus moved to a gaming project). Nothing is scheduled or running for Trading. Paper only when resumed: no live trading, no live keys, no money movement.
+Resume point: pre-registered H0/H1 hypotheses were being written (`trading/hypotheses/`, unreviewed), the numbers in `trading/knowledge/` are still unverified (the sandbox network blocks the primary-source sites), and A4/A5 decisions stand.
 
 ## Decisions on record
 - A3 (2026-11-22): approved; markets: both US stocks/ETFs and crypto spot.
