@@ -1,12 +1,11 @@
 # Research focus
 
-Current focus: broad
+Current focus: PC game ideas on Steam (tags: idle, loot, ARPG, desktop companion, adventure)
 
-<!-- Default is `broad`: the researcher scans widely for any trend/opportunity worth pitching.
-To steer him, replace the line above with specific topics, e.g.
-  Current focus: AI tools for freelancers; developer productivity
-and optionally add constraints below (audience, budget, tech, things to avoid).
-Set it back to `broad` to clear. You can also just tell Claude in chat and it will update this file. -->
+<!-- Default is `broad`. Set by the owner on 2026-11-24 for the gaming project. Set back to `broad` to clear. -->
 
 Constraints:
-- none
+- A PC game built with a game engine (e.g. Godot or Unity); desktop, not mobile or browser-only.
+- Small scope that a small team of AI agents can build and demo: code-driven art or simple generated sprites, no paid assets, no spend.
+- No publishing, posting or release without the owner's sign-off.
+- Anime-flavoured and slime characters are welcome but not required.

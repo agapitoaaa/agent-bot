@@ -26,3 +26,6 @@ The page is the human's single place to run the pipeline: Pipeline status, Appro
 
 ## Trading department
 Ledger (`trader`) has a corner of the office: two-monitor desk, a market board on the wall, and a green rug. Events `trade_opened`, `trade_closed`, `risk_block` and `halt` animate him (bubbles, alerts). Paper only; no real trades exist.
+
+## Office feel (2026-11-24)
+Idle slimes hop now and then and nap (floating z's) after 30 s of doing nothing; tap or click a slime for a persona quip and a bounce; hover for a card (role, accessory, current state, personality). Light mode Auto/Day/Night follows the viewer's local time (night sky with stars, desk glow, dusk tint). Props: wall clock (real time), coffee machine with steam, swaying plant, drifting sakura petals. Sound is optional (off by default, starts only after a click): soft blips when slimes speak, a chime for a new approval.
