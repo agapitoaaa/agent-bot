@@ -116,6 +116,10 @@ textarea.field{min-height:4em}
 .docs pre{margin:8px 0 2px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f-mono);font-size:12.5px;line-height:1.5;max-height:55vh;overflow:auto}
 .hcard{position:absolute;z-index:5;pointer-events:none;background:#fff;color:#1f2745;border-radius:1.2cqw;padding:.9cqw 1.3cqw;box-shadow:0 4px 14px rgba(30,40,90,.3);font-size:max(10px,1.3cqw);display:grid;gap:2px;max-width:30cqw;transform:translate(12px,12px)}
 .hcard[hidden]{display:none}
+#approvals.popup{position:fixed;z-index:50;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px - env(safe-area-inset-top,0px));overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.backdrop{position:fixed;inset:0;z-index:49;background:rgba(10,14,40,.55)}
+#apclose{display:none;margin-left:auto}
+#approvals.popup #apclose{display:inline-block}
 .hcard b{font-weight:600} .hcard em{color:#53628a;font-style:normal}
 .legend{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
 .legend b{color:var(--ink);font-weight:600}
@@ -172,7 +176,7 @@ textarea.field{min-height:4em}
   </section>
 
   <section class="card" id="approvals" aria-labelledby="ap-h">
-    <h2 id="ap-h">Approvals <span class="cnt" id="apcount">0</span></h2>
+    <h2 id="ap-h">Approvals <span class="cnt" id="apcount">0</span><button type="button" class="act" id="apclose">Close</button></h2>
     <p class="apnote" id="apnote">Loading proposals&hellip;</p>
     <div id="aplist"></div>
     <details id="apdone" hidden><summary>Answered (<span id="apdn">0</span>)</summary><div id="apdonelist"></div></details>
@@ -725,13 +729,15 @@ function describeNow(h){var a=sim.a[h.id];return h.sleeping?'napping':a.mode==='
 stageEl.addEventListener('pointermove',function(ev){
   var b=pickAt(ev);if(!b){hcard.hidden=true;stageEl.style.cursor='default';return;}
   stageEl.style.cursor='pointer';var c=byId[b.h.id];hcard.textContent='';
-  hcard.appendChild(el('b','',c.name+' \u00b7 '+c.role));hcard.appendChild(el('span','','Wearing: '+c.acc));hcard.appendChild(el('span','','Now: '+describeNow(b.h)));hcard.appendChild(el('em','',c.blurb));
+  hcard.appendChild(el('b','',c.name+' \u00b7 '+c.role));hcard.appendChild(el('span','','Wearing: '+c.acc));hcard.appendChild(el('span','',c.id==='you'?(OPEN?OPEN+' waiting for you. Click to review and approve.':'Nothing waiting. Click to open approvals.'):'Now: '+describeNow(b.h)));hcard.appendChild(el('em','',c.blurb));
   hcard.style.left=Math.min(70,Math.max(2,b.lx/960*100))+'%';hcard.style.top=Math.min(78,Math.max(2,b.ly/540*100))+'%';hcard.hidden=false;
 });
 stageEl.addEventListener('pointerleave',function(){hcard.hidden=true;});
 stageEl.addEventListener('click',function(ev){
   var b=pickAt(ev);if(!b)return;var id=b.h.id,a=sim.a[id],q=QUIPS[id]||['Hi!'];
-  a.bounceUntil=sim.t+0.8;a.idleSince=sim.t;sim.say(id,q[Math.floor(Math.random()*q.length)]);
+  a.bounceUntil=sim.t+0.8;a.idleSince=sim.t;
+  if(id==='you'){openApprovals();return;}
+  sim.say(id,q[Math.floor(Math.random()*q.length)]);
 });
 window.__hits=HITS;
 /* sound (off by default; starts only after a click) */
@@ -894,7 +900,23 @@ function initControls(db,canWrite){
     STAGES.forEach(function(n,i){st.appendChild(el('li',i<idx?'done':(i===idx?'now':''),n));});
   },function(){});
 }
-document.getElementById('goap').addEventListener('click',function(){document.getElementById('approvals').scrollIntoView({behavior:'smooth',block:'start'});});
+var apBackdrop=null,apReturnFocus=null;
+function openApprovals(){
+  var s=document.getElementById('approvals');if(s.classList.contains('popup'))return;
+  apReturnFocus=document.activeElement;
+  apBackdrop=document.createElement('div');apBackdrop.className='backdrop';apBackdrop.addEventListener('click',closeApprovals);document.body.appendChild(apBackdrop);
+  s.classList.add('popup');s.setAttribute('role','dialog');s.setAttribute('aria-modal','true');s.scrollTop=0;
+  document.getElementById('apclose').focus();
+}
+function closeApprovals(){
+  var s=document.getElementById('approvals');if(!s.classList.contains('popup'))return;
+  s.classList.remove('popup');s.removeAttribute('role');s.removeAttribute('aria-modal');
+  if(apBackdrop&&apBackdrop.parentNode)apBackdrop.parentNode.removeChild(apBackdrop);apBackdrop=null;
+  if(apReturnFocus&&apReturnFocus.focus)apReturnFocus.focus();
+}
+document.getElementById('apclose').addEventListener('click',closeApprovals);
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeApprovals();});
+document.getElementById('goap').addEventListener('click',openApprovals);
 (async function(){
   var api=window.claude;
   if(!api||!api.use){setApNote('Approvals appear here when this page is opened from claude.ai.');return;}

@@ -45,7 +45,14 @@ Request format (appended by `/tick`):
 
 
 ### A6: plan | Plan: agent-spend-lens (narrow: per-flow-stage cost + waste flags)
-- Status: open
+- Status: answered
 - Asked: 2026-11-24T16:20:00Z
 - Summary: Plan at runs/product-pipeline-20261122-091241/plan.md. Local read-only Python CLI + static HTML report attributing estimated USD cost per flow step from runs/*.jsonl joined with Claude Code session logs; explainable waste flags. Open decisions: (1) Python stdlib only (recommended) vs Node; (2) location in this repo vs separate; (3) is usefulness for our own flows enough given unproven demand; (4) confirm attribution policy (step time window, unmatched = unattributed); (5) publishing stays a separate human decision. Approve = proceed to design and build M0 (schema check) first.
+- Decision: park (answered via office panel)
+
+### A7: idea | Game project: pick a game idea (PC, Godot or Unity)
+- Status: open
+- Asked: 2026-11-24T16:22:43Z
+- Summary: Nova's Steam scout (tags idle, loot, ARPG, desktop companion, adventure): five game pitches G1-G5 in ideas/backlog.md (Game track). Recommended: G1 Slime Strip, with G4 Slime Pal as a cheap first proof of the window technique.
 - Decision:
+
