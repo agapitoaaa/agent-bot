@@ -43,3 +43,9 @@ Request format (appended by `/tick`):
 - Summary: Curriculum, strategy catalog and source catalog (trading/knowledge/). Recommended: benchmark plus one trend experiment (max 3 parameter sets), with QA challenge. Approving only lets Ledger write pre-registered hypotheses; nothing is coded or run.
 - Decision: approve baseline-trend (benchmark + one trend experiment, max 3 parameter sets, QA challenge before promotion) (answered 2026-11-24T16:00:15Z via office panel)
 
+
+### A6: plan | Plan: agent-spend-lens (narrow: per-flow-stage cost + waste flags)
+- Status: open
+- Asked: 2026-11-24T16:20:00Z
+- Summary: Plan at runs/product-pipeline-20261122-091241/plan.md. Local read-only Python CLI + static HTML report attributing estimated USD cost per flow step from runs/*.jsonl joined with Claude Code session logs; explainable waste flags. Open decisions: (1) Python stdlib only (recommended) vs Node; (2) location in this repo vs separate; (3) is usefulness for our own flows enough given unproven demand; (4) confirm attribution policy (step time window, unmatched = unattributed); (5) publishing stays a separate human decision. Approve = proceed to design and build M0 (schema check) first.
+- Decision:

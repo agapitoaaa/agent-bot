@@ -1,148 +1,105 @@
-# Plan: P2 narrow, per-flow-stage cost attribution and waste heuristics (working name: stagecost)
+# Plan: agent-spend-lens (narrow direction, approved A2)
 
-Date: 2026-11-24. Author: Marlowe (planner). Input: research.md (2026-11-22), ideas/backlog.md P2, human approval A2 (NARROW direction).
+Date: 2026-11-24. Author: Planner (Marlowe). Input: research.md. Status: draft for human approval.
+office: stage=planning, desk=planner, sprite=planner
 
-## 0. Facts observed while planning (verified this session)
-- `scripts/log_event.py` writes `runs/<run_id>.jsonl`. Event fields: `ts` (UTC ISO, whole seconds), `run_id`, `type` (run_started, step_started, handoff, step_done, escalation, run_done), optional `flow`, `step`, `agent`, `to`, `msg`.
-- Five run logs exist in `runs/` (scout, trader-research, trader-knowledge, trader-hypotheses, product-pipeline).
-- One real session transcript exists in this sandbox: `/root/.claude/projects/-home-user-agent-bot/80bc31e5-....jsonl`. I did NOT open it (field names are Task 0's job, per brief). Only one session exists, so the dogfood dataset is thin; synthetic fixtures are required for most tests.
-- Join key is time only: run events carry `ts` and agent name, transcripts carry their own timestamps. There is no shared id. This is the central design risk (see R1).
+## 1. One-line pitch
+A local, read-only CLI plus static HTML report that attributes estimated USD cost to each stage/agent of a multi-agent flow run (joining this repo's `runs/*.jsonl` event logs with Claude Code session JSONL), and flags likely waste or runaway behaviour with explainable heuristics.
 
-## 1. Goals
-1. For a given run (`runs/<run_id>.jsonl`), report estimated USD and tokens per flow stage (step) and per agent, by joining time windows from step_started/step_done with timestamps on transcript assistant messages (main and sidechain).
-2. Flag a small set of waste/runaway patterns, each with a plain-language explanation and the evidence (message ids, counts).
-3. Make every number honest: USD labelled "estimate", price-table date shown, an explicit `unattributed` bucket instead of guessing.
-4. Output: local CLI (text and JSON) and one static, self-contained HTML report. Python 3 stdlib only.
+## 2. Goals
+1. Per-flow-stage cost: for a given `run_id`, show estimated cost and tokens per step/agent.
+2. Waste/runaway flags: a small set of transparent heuristics, each with the evidence lines that triggered it.
+3. Fully local, read-only, no network at runtime, no spend.
+4. Useful on this repo's own flows first; reusable by others only as a side effect.
 
-## 2. Non-goals (what we are NOT doing)
-- Not a generic Claude Code cost viewer: no daily/monthly/5-hour-block views, no per-model dashboards (ccusage and agentsight cover them).
-- No Codex/OpenCode/other-agent parsers.
-- No hooks, no OTel, no MCP server, no live/real-time view, no TUI.
-- No network at runtime, no live price fetch, no cloud, no spend, no deploy.
-- No writes to logs or transcripts (read-only); report goes only to a user-specified output path under a gitignored dir.
-- No publishing (repo, PyPI, npm, post) without human sign-off.
-- No per-tool-call or per-file cost attribution (competitors list it as roadmap; out of scope).
-- No billing accuracy claims. No auto-remediation of wasteful sessions.
+## 3. Non-goals (what we are NOT doing)
+- No general per-day/per-session/per-model viewer (ccusage and agentsight already cover it).
+- No hooks, MCP server, OpenTelemetry, proxy or SDK instrumentation. Log-reading only.
+- No Codex/OpenCode/other-agent support in v1.
+- No live/real-time view, no web server beyond opening a static file.
+- No billing-grade accuracy; no budgets, alerts or enforcement.
+- No fetching live prices; no cloud, hosting, accounts, telemetry.
+- No publishing (GitHub public repo, npm/PyPI, Product Hunt, blog) without explicit human sign-off.
+- No office-view integration in v1 (only keep output keys compatible with `office:` roles).
+- No market-validation work; demand for this angle is unproven and is accepted as a risk.
 
-## 3. Target user
-Primary: the owner of this repo, who orchestrates multi-agent flows via `/run-flow` and wants to know which stage/agent cost what and which stages were wasteful. Secondary (unproven, do not design for it): other people running multi-agent flows with a similar event log. Demand outside this repo is unverified; success is judged on dogfood value first.
+## 4. Constraints (from research, binding)
+No spend; no deploy; read-only on logs, never modify/transmit; no runtime network; USD always labelled "estimate" with price-table date and attribution policy shown; tests use synthetic data only (no real transcripts committed); real log schema verified before parser design; redact prompt/code text by default in reports.
 
-## 4. MVP scope (about one week, small team)
-In:
-- `stagecost report <run_id>`: reads `runs/<run_id>.jsonl` plus transcripts under a configurable projects dir (default `~/.claude/projects/`), prints a per-stage and per-agent table, writes `report.html` and `report.json`.
-- `stagecost runs`: lists runs with estimated total, for picking one.
-- Price table: `prices.json` in repo, per-model rates incl. cache write/read, with an `as_of` date and source note; unknown model gives tokens only, cost flagged "no price".
-- Redaction on by default: no prompt text, file contents or tool-call arguments in output; only ids, counts, tool names, model names, paths shortened to basename; `--show-details` opt-in (still local).
-- Heuristics (4, each with threshold in config):
-  H1 repeated identical tool call (same tool and same args hash) 3 or more times within one stage.
-  H2 large re-read: same file read 3 or more times in a stage, each over N tokens of result.
-  H3 stage cost outlier: a stage costing over X times the median of the same agent's stages across other runs (needs at least 3 prior stages, else "insufficient data").
-  H4 low cache reuse: cache-read share below Y percent on a stage with over Z input tokens.
-- Fixtures: synthetic transcripts and run logs generated by a script, plus optionally one redacted derivative of our own run, never the raw transcript.
+## 5. User stories
+- U1. As a flow author, I run `spend-lens run <run_id>` and see cost per step/agent so I know which stage is expensive.
+- U2. As a flow author, I see which Claude sessions/subagent files were matched to which step, and which could not be matched, so I can trust (or distrust) the numbers.
+- U3. As a user, I get warnings like "step 4 re-read the same file 9 times" or "step 3 consumed 5x the median step cost", each with pointers to evidence, so I can fix a runaway.
+- U4. As a privacy-conscious user, I am sure the tool never writes to or sends my logs and the report contains no prompt text unless I opt in.
+- U5. As a reader of the report, I always see "estimate", the price-table date and the attribution policy.
 
-Out of MVP (backlog): trend over time, diff between runs, skills attribution, other agents.
+## 6. Acceptance criteria
+Schema and parsing
+- AC1. A written `docs/spend-lens-log-schema.md` documents fields actually observed in a real local session file (usage/token fields, model, sidechain/subagent marker, tool_use for Task/Skill, timestamps, subagent file layout) and the `runs/*.jsonl` event schema (observed: `ts, run_id, type, flow, step, agent, msg`; types incl. `run_started, step_started, step_done, escalation`). Unknown/missing fields are listed as such.
+- AC2. Parser tolerates unknown fields, malformed lines and missing usage (counted and reported, never crashes).
+Attribution
+- AC3. Attribution policy is written down and implemented as exactly one policy: assign a Claude message to a flow step when its timestamp falls in that step's `step_started`..`step_done` window (and, if present, subagent identity matches the step's agent). Anything outside any window or ambiguous goes to an explicit "unattributed" line, never guessed.
+- AC4. Per-step totals plus unattributed sum exactly to the run total (tested).
+- AC5. Cost = tokens x hand-maintained price table (input, output, cache write, cache read) in a dated data file; unknown model yields tokens with cost "unknown", not a guess.
+Waste heuristics (v1 set, each toggleable and with thresholds in config)
+- AC6. H1 repeated reads: same file/tool-call signature repeated >= N times within a step.
+- AC7. H2 outlier step: step cost > K x median of other steps in the run (needs >= 3 steps).
+- AC8. H3 low cache reuse: cache-read share of input tokens below a threshold on large contexts.
+- AC9. H4 retry loop: same tool call + error pattern repeated >= N times consecutively.
+- Each flag lists evidence (line numbers/message ids), not prompt text, and is labelled "heuristic".
+Output and safety
+- AC10. CLI prints a table; `--html out.html` writes a single self-contained static file (no external scripts/fonts/network); `--json` for machines.
+- AC11. Tool opens log files read-only; a test asserts file hashes unchanged and that no network module is imported/used.
+- AC12. All fixtures synthetic; a check fails if fixtures contain strings matching real-session path patterns.
+- AC13. Demo on this repo's own `runs/` logs produces a report, reviewed by a human before anything leaves the repo.
 
-## 5. Attribution policy (explicit)
-Unit: one assistant message with a `usage` block (exact field names confirmed in Task 0). Each is assigned to at most one stage.
-1. Stage window: from `step_started(step N)` ts to the matching `step_done(step N)` ts (or the next `step_started`, or run end, if done is missing; flagged "inferred window"). Event ts are whole seconds, so allow a documented tolerance of 2 s at the edges; messages in the tolerance zone go to `unattributed`, not to a neighbour.
-2. Agent: main-thread messages inside a window belong to the window's stage and the stage's `agent` field. Sidechain (subagent) messages inside the window go to the same stage, shown as sub-lines "agent: <name> via subagent" so the agent split is visible.
-3. Context and cache cost: no splitting or weighting. Each message's own usage is priced as-is (input, output, cache write, cache read) and charged to the stage in which that message occurred. Cache-write cost paid in stage A and re-read cheaply in stage B stays with the stage that incurred each charge. We state this limitation in the report: "a stage that reuses a warm cache looks cheaper than it would cold."
-4. Overlap: if two windows overlap (parallel steps), messages in the overlap that cannot be told apart by sidechain/agent evidence go to `unattributed (overlap)`. No proportional guess.
-5. Messages outside any window but inside the run's overall time span: `unattributed (between stages)` (this is where orchestrator, i.e. main session, overhead shows). Messages in a session that is not provably part of the run (no overlap with the run span): excluded and counted in a footer line.
-6. Multiple sessions in the same time span (e.g. user working in parallel): only sessions whose project dir matches the repo are considered; if two sessions overlap in a window, both are included and the report warns "concurrent sessions, stage totals may include unrelated work" (we cannot prove otherwise).
-7. Report always shows: attributed total, unattributed total, excluded total, and the sum check (attributed + unattributed = all in-span cost).
+## 7. Milestones
+- M0 Schema first (gate). Inspect real local files (`~/.claude/projects/-home-user-agent-bot/*.jsonl`, subagent layout, `runs/*.jsonl`); write schema doc and attribution policy. Exit: AC1, AC3 on paper; human glance at policy.
+- M1 Core engine. Parser, price table, step-window attribution, totals, CLI table. Exit: AC2, AC4, AC5, AC10 (CLI), AC11, AC12.
+- M2 Heuristics. H1 to H4 with evidence. Exit: AC6 to AC9.
+- M3 Report. Static HTML + JSON, estimate labelling, redaction default. Exit: AC10, U5.
+- M4 QA + dogfood. Run on own runs, tune thresholds, final review. Exit: AC13, all ACs green. Stop; publishing is a separate human decision.
 
-## 6. User stories
-1. As the repo owner, I run `stagecost report <run_id>` and see cost per stage and agent so I know where a flow's money went.
-2. As the owner, I see an `unattributed` line with a reason, so I trust the attributed numbers.
-3. As the owner, I see flagged wasteful patterns with explanation and evidence so I can fix a flow or agent instruction.
-4. As the owner, I open one HTML file offline and share a redacted screenshot safely.
-5. As the owner, I can tell every USD figure is an estimate and from which price date.
-6. As the owner, I can be sure the tool never changes my logs or contacts the network.
+## 8. Ordered task list
+Stack suggestion: Python 3 stdlib only (zero dependencies, no install cost). Frontend here = the static HTML report.
 
-## 7. Acceptance criteria (testable)
-Parsing and join
-- AC1: Given synthetic fixture F1 (3 sequential stages, known token counts), per-stage tokens equal the fixture's ground truth exactly and USD equals tokens times `prices.json` rates within 0.01 cent.
-- AC2: Fixture F2 with a subagent (sidechain) inside stage 2: those tokens appear under stage 2, labelled subagent, and stage totals include them.
-- AC3: Fixture F3 with a message between stages: it appears in `unattributed (between stages)`, not in either neighbour.
-- AC4: Fixture F4 with overlapping windows: overlap messages land in `unattributed (overlap)`.
-- AC5: Fixture F5 with missing `step_done`: window inferred, flagged "inferred window".
-- AC6: For every fixture, attributed + unattributed equals the sum of all in-span messages (exact token equality).
-- AC7: Unknown model gives tokens, no USD, and a visible "no price for <model>" note; malformed JSONL lines are skipped and counted, no crash; unknown extra fields ignored.
-Heuristics
-- AC8: Each of H1 to H4 has a positive fixture (flag raised with explanation and evidence ids) and a negative fixture (no flag). H3 with fewer than 3 prior stages outputs "insufficient data", not a flag.
-Output and honesty
-- AC9: CLI text, JSON and HTML all show the label "estimate", the price-table `as_of` date, and the attribution policy summary; a test asserts these strings.
-- AC10: Default output contains none of the prompt or tool-argument text from a fixture seeded with canary strings; with `--show-details` canaries may appear. Test greps output for canaries.
-- AC11: HTML is a single file, no external URLs (no http/https in src/href/script/css), opens with no network; a test scans for `http`.
-- AC12: Read-only: test runs the tool on a read-only copy of fixtures and checks file hashes unchanged. Static check: source has no network imports (socket, urllib, http, requests) and no open-for-write on input paths.
-- AC13: No real transcripts committed: a test/CI check fails if any file under `tests/` or `projects/` matches a real session uuid name pattern or contains the string markers listed in `fixtures/README.md`; fixtures are generated by `make_fixtures.py`.
-- AC14: Schema drift: when a transcript lacks the `usage` field on assistant lines, the tool reports "N messages without usage" and continues.
-Dogfood
-- AC15: Running on `runs/product-pipeline-20261122-091241.jsonl` with the real sandbox transcript completes without error and prints the sum check; a human reviews the output once and records in the QA report whether the stage split looks plausible (qualitative, owner sign-off, see Decision D2).
-- AC16: Runtime for a 50 MB transcript set under 10 s on this sandbox (single pass, streaming).
+| # | Task | Owner | Depends | Milestone |
+|---|------|-------|---------|-----------|
+| 1 | Inspect real session + subagent files and `runs/*.jsonl`; write `docs/spend-lens-log-schema.md` (observed vs unknown) | backend | none | M0 |
+| 2 | Write attribution policy + price-table format (dated, per-model, 4 token classes) in `docs/` | backend (review: qa) | 1 | M0 |
+| 3 | Define test strategy and synthetic fixture generator (multi-step run, subagents, missing usage, bad lines, unknown model, overlap windows) | qa | 1 | M0 |
+| 4 | Report/CLI output spec: table columns, estimate banner, unattributed line, flag presentation, redaction default (wireframe, light/dark, phone-width) | designer | 2 | M0/M1 |
+| 5 | Tolerant JSONL parser for sessions and run events | backend | 1 | M1 |
+| 6 | Price table data file + cost calculator, unknown-model handling | backend | 2 | M1 |
+| 7 | Step-window attribution + unattributed bucket + sum invariant | backend | 5, 6 | M1 |
+| 8 | CLI (`run <run_id>`, `--json`, `--html`) | backend | 7 | M1 |
+| 9 | Tests for parser, cost, attribution invariants, read-only and no-network assertions | qa | 3, 5-8 | M1 |
+| 10 | Heuristics H1 to H4 with evidence output + config thresholds | backend | 7 | M2 |
+| 11 | Heuristic tests incl. false-positive cases on clean synthetic runs | qa | 3, 10 | M2 |
+| 12 | Static HTML report from JSON (self-contained, accessible, no external assets) | frontend | 4, 8 | M3 |
+| 13 | Report verification: opens offline, no network requests, redaction default, labels present | qa | 12 | M3 |
+| 14 | Dogfood on this repo's `runs/`; review thresholds; list known limitations in README section | backend + qa | 10, 12 | M4 |
+| 15 | Final review against AC1-AC13; hand to human | qa | 14 | M4 |
 
-## 8. Milestones
-- M0 (day 1): Schema and gap confirmed (Task 0, 1). Go/no-go checkpoint, see section 10.
-- M1 (day 2): Design done: CLI spec, report wireframe, price table format, policy signed off by planner.
-- M2 (day 3 to 4): Backend: parser, join, price, attribution, JSON output; AC1 to AC7, AC12, AC14 passing.
-- M3 (day 4 to 5): Heuristics + HTML report + redaction; AC8 to AC11.
-- M4 (day 6): QA full pass, dogfood run, fixes; AC13, AC15, AC16.
-- M5 (day 7): Release prep (local only: README, how to run, version tag locally), handoff document. Publishing is out of scope pending sign-off.
+## 9. Risks
+| Risk | Level | Mitigation |
+|---|---|---|
+| Log format undocumented and shifting by version | med | M0 gate; tolerant parser; record Claude Code version in report; unknown fields reported |
+| Time-window attribution wrong when steps overlap or run in parallel, or subagent runs outlive step | med-high | Explicit unattributed bucket; show match confidence and counts; no guessing; document limitation |
+| Misleading numbers (cache/shared context, stale prices) | med | "Estimate" labels everywhere; dated price table; unknown model shown as unknown |
+| Heuristics produce noisy false positives | med | Few heuristics, evidence required, thresholds configurable, labelled "heuristic" |
+| Product already covered/vendor ships native attribution (research: high) | high | Scope is own-flow use; no marketing effort; re-check vendor features before any publish decision |
+| Run events may not include session ids, so join relies on timestamps/cwd | med | Verify in M0; if joining is too weak, report as a finding and ask human before continuing |
+| Privacy: real transcripts leaking into fixtures, reports | med | Synthetic fixtures only, fixture check (AC12), redaction default |
+| Demand for narrow angle unproven | high (unknown) | Accepted; goal is value for this repo; kill after M1 if stage attribution is not trustworthy |
 
-## 9. Ordered task list
-| # | Task | Owner | Depends on | Output |
-|---|---|---|---|---|
-| 0a | Inspect the REAL transcript at `/root/.claude/projects/-home-user-agent-bot/*.jsonl` (read-only; do not copy into repo). Record, with field paths and redacted example lines: usage keys (input, output, cache creation, cache read, any per-ttl cache split), model, message id and request id (duplicate lines per API response?), timestamp field, sidechain flag, subagent file layout (separate files vs inline), tool_use/tool_result structure, any Task/Agent/Skill call shape, line types to ignore. Also check how many lines share the same message id (double counting risk). | backend-engineer | none | `docs/stagecost-schema.md` |
-| 0b | Read ccusage and agentsight READMEs (WebSearch/fetch, no cost), plus agent-cost-mcp and CodeBurn if quick. Answer: does any of them attribute cost to a user-supplied time window or event log? Do any detect repeated calls or runaway? Does `--attribution` / attribution.json exist? Record license, last release date. | designer (research) with backend-engineer review | none | `docs/stagecost-gap-check.md` with go/no-go |
-| 0c | Planner checkpoint: if 0b shows an existing tool already does flow/stage attribution or the heuristics, stop and escalate to human. If 0a shows no usable timestamps or usage, stop and escalate. | planner | 0a, 0b | decision note |
-| 1 | Design: CLI spec (commands, flags, exit codes), price table format and initial rates with source link and date (from official pricing page, read manually, no paid anything), report wireframe (stage table, agent split, unattributed block, flags panel, estimate banner), redaction rules. | designer | 0c | `docs/stagecost-design.md` |
-| 2 | Fixture generator `make_fixtures.py` producing F1 to F5 and heuristic positive/negative cases with canary strings and ground-truth JSON; fixture README. | qa-engineer | 0a | `projects/stagecost/tests/` fixtures |
-| 3 | Parser and join: stream transcripts, dedupe by message id, build windows, apply policy section 5, price, emit JSON. | backend-engineer | 1, 2 | `projects/stagecost/` code |
-| 4 | Heuristics H1 to H4 with config thresholds and explanations. | backend-engineer | 3 | code |
-| 5 | CLI text output + `runs` command + redaction layer. | backend-engineer | 3 | code |
-| 6 | Static HTML report from JSON (single file, inline CSS, minimal inline JS or none, accessible table, estimate banner). | frontend-engineer | 1, JSON schema from 3 | `report` template |
-| 7 | Test suite for AC1 to AC16, including the canary, no-network, read-only and no-real-transcript checks. | qa-engineer | 2, 3 to 6 | tests + QA report |
-| 8 | Dogfood run on this repo's runs; tune default thresholds only if they flag obvious nonsense; record findings. | qa-engineer with backend-engineer | 7 | `docs/stagecost-dogfood.md` |
-| 9 | README (install-free usage, policy, limits, price date, privacy), local version tag, `.gitignore` for output dir. No push/publish. | release-engineer | 7 | README, tag |
-| 10 | Handoff document: what was built, what is unverified, open decisions, how to update prices. | handoff-writer | 8, 9 | `handoff.md` |
+## 10. Kill / pause criteria
+- After M0: if run events and session logs cannot be joined without guessing, stop and escalate.
+- After M1: if unattributed share on own runs is persistently large (suggest > 40%), stop and escalate rather than polish.
 
-Code location: `projects/stagecost/` (per repo layout for built products).
-
-## 10. Risks
-| # | Risk | Likelihood / impact | Mitigation |
-|---|---|---|---|
-| R1 | Time-only join is fuzzy (second-resolution event ts, concurrent sessions, orchestrator overhead between stages). | High / high | Explicit unattributed buckets, tolerance rule, concurrency warning. Optional follow-up (not MVP): extend `log_event.py` to log a session id, needs human OK as it changes a shared script. |
-| R2 | Log format undocumented and may change. | Medium / high | Task 0a, defensive parsing (AC7, AC14), schema doc with version noted. |
-| R3 | Duplicate lines per API response inflate tokens. | Medium / high | Task 0a checks; dedupe by message id; AC1 ground truth catches it. |
-| R4 | Gap is thinner than thought; competitor already does it; vendor ships native. | Medium / high | Task 0b and checkpoint 0c before design spend. |
-| R5 | Prices stale or wrong; estimates misread as bills. | Medium / medium | `as_of` date and "estimate" everywhere (AC9), manual update procedure in handoff. |
-| R6 | Report leaks prompt/code content. | Low / high | Redact by default, canary tests (AC10), no committed real transcripts (AC13). |
-| R7 | Heuristic thresholds yield noise or false alarms. | High / medium | Few heuristics, explanation plus evidence, configurable, dogfood tuning, label as "heuristic hint". |
-| R8 | Only one real session in the sandbox, so dogfood and H3 baselines are thin. | High / medium | Synthetic fixtures carry the tests; H3 has "insufficient data" state. |
-| R9 | Demand beyond this repo unproven; tool may only serve us. | High / low | Accept: goal is dogfood value; no marketing work planned. |
-| R10 | Scope creep towards a general viewer. | Medium / medium | Non-goals list; planner rejects additions at review. |
-
-(Marlowe's note on my own blind spot: four heuristics and two surfaces is already tight. If M2 slips, cut H3 and H4 first, not the unattributed accounting.)
-
-## 11. Success metrics
-- Correctness: AC1 to AC7 pass; attributed + unattributed reconciles exactly to in-span tokens on every fixture and on the dogfood run.
-- Coverage on dogfood: share of in-span cost that is attributed to a stage is reported; target at least 80 percent for sequential flows (a target to observe, not a hard gate, because concurrent sessions can lower it).
-- Usefulness (owner judgement, one review): at least 1 flagged finding on our runs that the owner agrees is a real improvement, or an explicit "no false alarms in 5 runs".
-- Safety: zero canary leaks, zero network imports, zero input-file changes.
-- Effort: delivered within about 7 working days of a small team; stop and re-plan if M2 is not done by day 5.
-- Not a metric: downloads, stars, adoption (no publishing planned).
-
-## 12. Decisions needed from the human (3)
-D1. Task 0 go/no-go: if 0b finds an existing free tool already attributes cost to custom time windows or event logs, do you want us to stop (use that tool) or continue anyway as a repo-specific tool? (Default if you do not answer: stop and report.)
-D2. Dogfood acceptance: are you willing to spend about 15 minutes reviewing one dogfood report and judging whether the stage split is plausible? Without that, AC15 stays unconfirmed.
-D3. May we later add a session id field to `scripts/log_event.py` events (a shared script used by `/run-flow`) to make the join exact? Not needed for the MVP; the MVP uses time only. (Default: no change.)
-
-## 13. What I could NOT verify
-- Any transcript field name (usage, model, sidechain, tool calls, timestamps, message-id duplication): not opened; Task 0a does this and everything in sections 5 and 7 assumes timestamps and usage exist per assistant message.
-- Whether subagent messages are inline with `isSidechain` or in separate files in this installed version (affects the join; research says both layouts exist).
-- Whether any existing tool already does flow-stage or time-window attribution, or runaway detection (research used search snippets only); `--attribution` existence.
-- Licenses and activity of competitors.
-- Current official model prices (price table must be filled from the official page by the designer, with date).
-- Demand for this outside the repo owner.
-- Whether the sandbox transcript covers the product-pipeline run's time span (only one session file exists, dated unknown to me); if not, the dogfood run on that specific run may attribute nothing, and a different run may have to be used.
+## 11. Open decisions for the human
+1. Language/stack: Python 3 stdlib (recommended) vs Node?
+2. Location: new top-level dir in this repo (e.g. `agent-spend-lens/`) vs separate repo later; and should it also have a `flows/` entry and `office:` role?
+3. Is own-repo usefulness a sufficient success bar (per research Q2), with kill criteria in section 10?
+4. Confirm v1 attribution policy (step time-window, unmatched = "unattributed") before M1 starts.
+5. Any later publishing is out of this plan; confirm it stays a separate decision.
