@@ -2,3 +2,4 @@
 {"ts": "2026-11-24T16:18:25+00:00", "run_id": "game-scout-20261124-161825", "type": "step_started", "agent": "researcher", "msg": "researching Steam trends"}
 {"ts": "2026-11-24T16:22:43+00:00", "run_id": "game-scout-20261124-161825", "type": "step_done", "agent": "researcher", "msg": "5 game pitches (G1-G5)"}
 {"ts": "2026-11-24T16:22:43+00:00", "run_id": "game-scout-20261124-161825", "type": "escalation", "agent": "researcher", "msg": "Game idea sign-off (A7)"}
+{"ts": "2026-11-24T16:32:56+00:00", "run_id": "game-scout-20261124-161825", "type": "step_started", "agent": "researcher", "msg": "G1 deep dive incl. Steam Market (A7 changes)"}

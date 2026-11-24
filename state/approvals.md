@@ -51,8 +51,8 @@ Request format (appended by `/tick`):
 - Decision: park (answered via office panel)
 
 ### A7: idea | Game project: pick a game idea (PC, Godot or Unity)
-- Status: open
+- Status: answered
 - Asked: 2026-11-24T16:22:43Z
 - Summary: Nova's Steam scout (tags idle, loot, ARPG, desktop companion, adventure): five game pitches G1-G5 in ideas/backlog.md (Game track). Recommended: G1 Slime Strip, with G4 Slime Pal as a cheap first proof of the window technique.
-- Decision:
+- Decision: changes: Give more context on Slime Strip. We want steam market trading (answered 2026-11-24T16:32:20Z via office panel)
 
