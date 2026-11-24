@@ -57,8 +57,8 @@ Request format (appended by `/tick`):
 - Decision: changes: Give more context on Slime Strip. We want steam market trading (answered 2026-11-24T16:32:20Z via office panel)
 
 ### A8: plan | Slime Strip with Steam Market trading: pick the market scope
-- Status: open
+- Status: answered
 - Asked: 2026-11-24T16:36:28Z
 - Summary: Nova's deep dive (runs/game-scout-20261124-161825/g1-deep-dive.md). Options: A tradable collectibles via playtime drops, no server (recommended); B server-authoritative loot; C no Market in v1. Approval starts a plan, not building; Steam Direct $100, hosting, publishing need explicit sign-off.
-- Decision:
+- Decision: approve; scope = C (no Market in v1; design the item data model so tradable can be added later) (answered 2026-11-24T16:37:35Z via office panel)
 
