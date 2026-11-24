@@ -2,3 +2,4 @@
 {"ts": "2026-11-22T09:12:41+00:00", "run_id": "product-pipeline-20261122-091241", "type": "step_started", "flow": "product-pipeline", "step": 2, "agent": "researcher", "msg": "researching P2 + competitor check"}
 {"ts": "2026-11-22T09:15:20+00:00", "run_id": "product-pipeline-20261122-091241", "type": "step_done", "step": 2, "agent": "researcher", "msg": "research.md: narrow it or no-go"}
 {"ts": "2026-11-22T09:15:20+00:00", "run_id": "product-pipeline-20261122-091241", "type": "escalation", "agent": "researcher", "msg": "Direction needed: P2 mostly already built (A2)"}
+{"ts": "2026-11-24T16:12:20+00:00", "run_id": "product-pipeline-20261122-091241", "type": "step_started", "flow": "product-pipeline", "step": 3, "agent": "planner", "msg": "planning narrow spend lens (A2)"}

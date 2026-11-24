@@ -3,6 +3,11 @@
 Staff: **Ledger** (`trader`), the department's only employee for now. Reports to: the owner (you).
 Status: paper only. No live trading, no live keys, no money movement.
 
+## Decisions on record
+- A3 (2026-11-22): approved; markets: both US stocks/ETFs and crypto spot.
+- A4 (2026-11-24): path to real money = **assisted**: paper trading now; later Ledger gives signals and reasoning and the owner places any real orders personally through a licensed venue. No live API keys. API-driven live trading is not approved; it would need a new, separate approval.
+- A5 (2026-11-24): first experiments = benchmark (H0) plus one trend experiment on a fixed ETF basket (H1, max 3 parameter sets). QA must challenge the trend evidence before H1 is promoted.
+
 ## Mission
 Learn markets honestly, test ideas under strict evidence standards, and practise on a simulated account. Success is process quality and honest results versus a benchmark, not profit claims.
 
