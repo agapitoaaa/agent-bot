@@ -29,3 +29,12 @@ Ledger (`trader`) has a corner of the office: two-monitor desk, a market board o
 
 ## Office feel (2026-11-24)
 Idle slimes hop now and then and nap (floating z's) after 30 s of doing nothing; tap or click a slime for a persona quip and a bounce; hover for a card (role, accessory, current state, personality). Light mode Auto/Day/Night follows the viewer's local time (night sky with stars, desk glow, dusk tint). Props: wall clock (real time), coffee machine with steam, swaying plant, drifting sakura petals. Sound is optional (off by default, starts only after a click): soft blips when slimes speak, a chime for a new approval.
+
+## Expanded office (2026-11-25)
+The floor grew from 18x11 to 26x15 with five new areas, reached with the camera chips above the scene (Whole office, Product studio, Trading, Game studio, Server room, Lounge, Library, Garden):
+- **Game studio:** arcade cabinets, a three-monitor dev table, bean bags, a design wall. Reserved for the game project.
+- **Server room:** racks whose lights blink faster whenever real events are logged (ties to the live feed).
+- **Library:** bookshelves, reading table, globe. Reserved for Ledger's knowledge and the team's notes.
+- **Lounge:** sofa, coffee table, vending machine and fridge. Slimes idle for about a minute, then wander here to relax, and walk back to their desk as soon as they have work.
+- **Garden:** pond, sakura tree with falling petals, bench, lantern, flowers.
+Camera: click a chip to zoom; hover or tap slimes works at any zoom; at night the new areas have their own lights (arcade, lantern, lamp, vending machine, sakura glow). Add new rooms by extending `zoneOf`, `ZC`, the `items` list and a `VIEWS` entry in `office.html`.
